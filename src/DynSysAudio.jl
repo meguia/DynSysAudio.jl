@@ -17,5 +17,8 @@ module DynSysAudio
 
     include("NoiseSource.jl")
     include("SinusoidSource.jl")
+    include("Sin2Source.jl")
+    include("ODESource.jl")
+
 
 end # module
