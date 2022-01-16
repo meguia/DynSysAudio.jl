@@ -3,6 +3,10 @@ uuid = "4008d5ad-effb-4270-99ea-953fb3d9c9a7"
 authors = ["meguia <eguiamc@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+SampledSignals = "bd7594eb-a658-542f-9e75-4c4d8908c167"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
 [compat]
 julia = "1"
 
