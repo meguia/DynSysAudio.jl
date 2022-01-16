@@ -30,7 +30,7 @@ samplerate(source::ODESource) = source.samplerate
 
 function unsafe_read!(source::ODESource, buf::Array, frameoffset, framecount)
     tend = source.time+(framecount-1)*source.dt
-    seq = TimeChoiceIterator(source.integrator,time:source.dt:tend)
+    seq = TimeChoiceIterator(source.integrator,source.time:source.dt:tend)
     buf[frameoffset+1:frameoffset+framecount,1] = [u[1] for (u,t) in seq]
     source.time += framecount*source.dt
     framecount
