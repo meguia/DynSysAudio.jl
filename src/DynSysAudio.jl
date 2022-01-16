@@ -11,6 +11,7 @@ module DynSysAudio
 
     export  NoiseSource,
             SinusoidSource,
+            Sin2Source,
             ODESource,
             samplerate
 
