@@ -16,11 +16,12 @@ end
 
 function ODESource(eltype, samplerate::Number, timescale::Number, pars::Array)
     u0 = [0.1, 0.1]
+    time = 0.0
     tspan = (0.0, 100.0)
     problem = ODEProblem(vdp!,u0,tspan,pars)
     dt = timescale/samplerate
     integrator = init(problem,Tsit5())
-    ODESource{eltype}(Float64(samplerate), timescale, time=0.0, dt, pars, problem,integrator)
+    ODESource{eltype}(Float64(samplerate), timescale, time, dt, pars, problem,integrator)
 end
 
 Base.eltype(::ODESource{T}) where T = T
