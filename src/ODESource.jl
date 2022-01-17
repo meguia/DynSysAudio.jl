@@ -9,7 +9,7 @@ end
 
 
 function ODESource(eltype, system::Function, samplerate::Number, timescale::Number, start_point::Array, pars::Array)
-    nchannels = length(start_point)
+    nchannels = 1
     time = 0.0
     tspan = (0.0, 100.0)
     problem = ODEProblem(system,start_point,tspan,pars)
