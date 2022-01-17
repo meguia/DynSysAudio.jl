@@ -12,7 +12,7 @@ end
 function ODESource(eltype, system::Function, samplerate::Number, timescale::Number, start_point::Array, pars::Array)
     nchannels = length(start_point)
     time = 0.0
-    gain = 1.0
+    gain = 0.1
     tspan = (0.0, 100.0)
     problem = ODEProblem(system,start_point,tspan,pars)
     dt = timescale/samplerate
@@ -27,7 +27,7 @@ samplerate(source::ODESource) = source.samplerate
 function unsafe_read!(source::ODESource, buf::Array, frameoffset, framecount)
     tend = source.time+(framecount-1)*source.dt
     seq = TimeChoiceIterator(source.integrator,source.time:source.dt:tend)
-    buf[frameoffset+1:frameoffset+framecount,:] = reduce(vcat,[u[:]' for (u,t) in seq])
+    buf[frameoffset+1:frameoffset+framecount,:] = reduce(vcat,[source.gain*u[:]' for (u,t) in seq])
     source.time += framecount*source.dt
     framecount
 end
