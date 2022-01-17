@@ -1,31 +1,25 @@
 mutable struct ODESource{T} <: SampleSource
     samplerate::Float64
-    timescale::Float64
+    nchannels::Int
     time::Float64
     dt::Float64
-    pars::Vector{Float64} 
     problem::OrdinaryDiffEq.ODEProblem
     integrator::OrdinaryDiffEq.ODEIntegrator
 end
 
-# ODE EXAMPLE
-function vdp!(du,u,p,t)
-    du[1] = u[2]
-    du[2] = p[1]*(1.0-u[1]*u[1])*u[2]-u[1]
-end	
 
-function ODESource(eltype, samplerate::Number, timescale::Number, pars::Array)
-    u0 = [0.1, 0.1]
+function ODESource(eltype, system::Function, samplerate::Number, timescale::Number, start_point::Array, pars::Array)
+    nchannels = size(start_point)
     time = 0.0
     tspan = (0.0, 100.0)
-    problem = ODEProblem(vdp!,u0,tspan,pars)
+    problem = ODEProblem(system,start_point,tspan,pars)
     dt = timescale/samplerate
     integrator = init(problem,Tsit5())
-    ODESource{eltype}(Float64(samplerate), timescale, time, dt, pars, problem,integrator)
+    ODESource{eltype}(Float64(samplerate), nchannels, time, dt, problem,integrator)
 end
 
 Base.eltype(::ODESource{T}) where T = T
-nchannels(source::ODESource) = 1
+nchannels(source::ODESource) = source.nchannels
 samplerate(source::ODESource) = source.samplerate
 
 function unsafe_read!(source::ODESource, buf::Array, frameoffset, framecount)
