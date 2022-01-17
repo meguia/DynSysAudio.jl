@@ -4,11 +4,12 @@ authors = ["meguia <eguiamc@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 SampledSignals = "bd7594eb-a658-542f-9e75-4c4d8908c167"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 
 [compat]
+DifferentialEquations = "7"
 julia = "1"
 
 [extras]
