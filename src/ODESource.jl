@@ -3,7 +3,7 @@ mutable struct ODESource{T} <: SampleSource
     nchannels::Int
     time::Float64
     dt::Float64
-    gain::FLoat64
+    gain::Float64
     problem::OrdinaryDiffEq.ODEProblem
     integrator::OrdinaryDiffEq.ODEIntegrator
 end
