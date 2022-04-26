@@ -16,7 +16,7 @@ function ODESource(eltype, system::Function, samplerate::Number, timescale::Numb
     tspan = (0.0, 100.0)
     problem = ODEProblem(system,start_point,tspan,pars)
     dt = timescale/samplerate
-    integrator = init(problem,Tsit5())
+    integrator = init(problem,Euler())
     ODESource{eltype}(Float64(samplerate), nchannels, time, dt, gain,problem,integrator)
 end
 
