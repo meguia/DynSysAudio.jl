@@ -37,7 +37,7 @@ function vdp!(du,u,p,t)
 end
 
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = ODESource(Float64, vdp!, 44100, 500.0, [0.1,0.1],[2.0])
+ode_source = ODESource(Float64, vdp!, 44100, 500.0, [0.1,0.1],[2.0]);
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═╡ disabled = true
