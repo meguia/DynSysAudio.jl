@@ -2,6 +2,7 @@ import SampledSignals: nchannels, samplerate, unsafe_read!
 
 mutable struct ODESource{T} <: SampleSource
     samplerate::Float64
+    timescale::Float64
     nchannels::Int
     time::Float64
     dt::Float64
@@ -20,7 +21,7 @@ function ODESource(eltype, system::Function, samplerate::Number, timescale::Numb
     dt = timescale/samplerate
     uini = start_point
     problem = ODEProblem(system,start_point,tspan,pars)
-    ODESource{eltype}(Float64(samplerate), nchannels, time, dt, uini, pars, gain,problem)
+    ODESource{eltype}(Float64(samplerate), Float64(timescale),nchannels, time, dt, uini, pars, gain,problem)
 end
 
 Base.eltype(::ODESource{T}) where T = T
@@ -30,8 +31,8 @@ samplerate(source::ODESource) = source.samplerate
 
 function unsafe_read!(source::ODESource, buf::Array, frameoffset, framecount)
     tend = source.time+(framecount-1)*source.dt
-    seq = hcat(solve(remake(prob;u0=source.uini,tspan=(source.time,tend),p=source.pars),Tsit5(),saveat=source.dt).u...)'
-    buf[frameoffset+1:frameoffset+framecount,:] = seq[1:framecount,:]
+    seq = hcat(solve(remake(source.problem;u0=source.uini,tspan=(source.time,tend),p=source.pars),Tsit5(),saveat=source.dt).u...)'
+    buf[frameoffset+1:frameoffset+framecount,:] = source.gain*seq[1:framecount,:]
     source.time += framecount*source.dt
     source.uini = seq[end,:]
     framecount
