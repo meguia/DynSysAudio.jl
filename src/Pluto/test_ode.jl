@@ -24,42 +24,60 @@ using Pipe: @pipe
 include("../ODESource.jl")
 
 # ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
-sdev = PortAudio.devices();
+sdev = PortAudio.devices()
+
+# ╔═╡ bcba720d-15a8-4b86-9f02-7d34e617a991
+sdev[4]
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[5],0,2)
+soundcard = PortAudioStream(sdev[4],0,2)
 
 # ╔═╡ 62b22e27-b50e-442b-b8b3-5ad955c000d2
-function vdp!(du,u,p,t)
+function fvdp!(du,u,p,t)
     du[1] = u[2]
-    du[2] = p[1]*(1.0-u[1]*u[1])*u[2]-u[1]
+    du[2] = p[1]*(1.0-u[1]*u[1])*u[2]-u[1]+p[2]*cos(2*pi*p[3]*t)
     du
 end
 
+# ╔═╡ 03d7a0d0-ca03-481c-8104-bd05876762f2
+function fduff!(du,u,p,t)
+	du[1] = u[2]
+    du[2] = p[1]*(1.0-u[1]*u[1])*u[2]-u[1]+p[2]*cos(p[3]*t)
+	du
+end	
+
+# ╔═╡ 91f27bdb-560f-476c-915e-775ba47650bd
+# 1 − (b + 1)x + ax2y
+#bx − ax2y
+function fbrussel!(du,u,p,t)
+	du[1] = 1-(p[2]+1)*u[1]+p[1]*u[1]*u[1]*u[2]
+    du[2] = p[2]*u[1]-p[1]*u[1]*u[1]*u[2]+p[3]*cos(p[4]*t)
+	du
+end	
+
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = ODESource(Float64, vdp!, 44100, 500.0, [0.1,0.1],[2.0]);
+ode_source = ODESource(Float64, fduff!, 44100, 500.0, [0.1,0.1],[2.0,0.0,1.0]);
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═╡ disabled = true
-#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
         @pipe read(ode_source, 1u"s") |> write(soundcard, _)
     end
 end
-  ╠═╡ =#
 
 # ╔═╡ 96a93b3c-4918-4eca-b537-ed4b5d81c26e
 md"""
 gain $(@bind g Slider(0:0.02:1.0,default=0.5;show_value=true)) \
-μ $(@bind μ Slider(0:0.05:5.0,default=0.5;show_value=true)) \
+μ $(@bind μ Slider(0.01:0.05:1.0,default=0.5;show_value=true)) \
+A $(@bind A Slider(0:0.05:2.0,default=0.0;show_value=true)) \
+ω $(@bind ω Slider(0:0.05:5.0,default=1.0;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:0.02,default=0.01;show_value=true)) \
 """
 
 # ╔═╡ 918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 begin
 	ode_source.gain=g
-	ode_source.pars=[μ]
+	ode_source.pars=[μ,A,ω]
 	ode_source.dt=Δt
 end	
 
@@ -86,7 +104,7 @@ Unitful = "~1.11.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.3"
+julia_version = "1.7.2"
 manifest_format = "2.0"
 
 [[deps.AbstractFFTs]]
@@ -347,10 +365,10 @@ uuid = "c894b116-72e5-5b58-be3c-e6d8d4ac2b12"
 version = "8.5.0"
 
 [[deps.DiffEqNoiseProcess]]
-deps = ["DiffEqBase", "Distributions", "GPUArrays", "LinearAlgebra", "Markdown", "Optim", "PoissonRandom", "QuadGK", "Random", "Random123", "RandomNumbers", "RecipesBase", "RecursiveArrayTools", "ResettableStacks", "SciMLBase", "StaticArrays", "Statistics"]
-git-tree-sha1 = "7f089e4db1c33b7e2fd1635a721c71bcb7d1ad38"
+deps = ["DiffEqBase", "Distributions", "GPUArrays", "LinearAlgebra", "Optim", "PoissonRandom", "QuadGK", "Random", "Random123", "RandomNumbers", "RecipesBase", "RecursiveArrayTools", "ResettableStacks", "SciMLBase", "StaticArrays", "Statistics"]
+git-tree-sha1 = "915286127c88b9306e29229cde687d46196f4060"
 uuid = "77a26b50-5914-5dd7-bc55-306e6241c503"
-version = "5.11.1"
+version = "5.11.0"
 
 [[deps.DiffResults]]
 deps = ["StaticArrays"]
@@ -393,7 +411,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[deps.Downloads]]
-deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[deps.DualNumbers]]
@@ -422,9 +440,9 @@ version = "2.4.8+0"
 
 [[deps.ExponentialUtilities]]
 deps = ["ArrayInterfaceCore", "GPUArrays", "GenericSchur", "LinearAlgebra", "Printf", "SparseArrays", "libblastrampoline_jll"]
-git-tree-sha1 = "343c0b28b7513bbdd8ea91d8500fd1f357944f22"
+git-tree-sha1 = "2a0f80d722d7c5d94ab29c76eefbed79ded3a696"
 uuid = "d4d017d3-3776-5f7e-afef-a10c40355c18"
-version = "1.17.1"
+version = "1.17.0"
 
 [[deps.FFMPEG_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
@@ -460,9 +478,6 @@ version = "0.1.18"
 git-tree-sha1 = "acebe244d53ee1b461970f8910c235b259e772ef"
 uuid = "9aa1b823-49e4-5ca5-8b0f-3971ec8bab6a"
 version = "0.3.2"
-
-[[deps.FileWatching]]
-uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -706,9 +721,9 @@ version = "3.100.1+0"
 
 [[deps.LLVM]]
 deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Printf", "Unicode"]
-git-tree-sha1 = "e7e9184b0bf0158ac4e4aa9daf00041b5909bf1a"
+git-tree-sha1 = "c1cd6561c4eb2176045de2b8016b62732a411f02"
 uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
-version = "4.14.0"
+version = "4.13.1"
 
 [[deps.LLVMExtra_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg", "TOML"]
@@ -890,9 +905,9 @@ version = "0.2.2"
 
 [[deps.MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "3f419c608647de2afb8c05a1b1911f45b35418e2"
+git-tree-sha1 = "4050cd02756970414dab13b55d55ae1826b19008"
 uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "1.0.3"
+version = "1.0.2"
 
 [[deps.NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
@@ -928,9 +943,9 @@ version = "0.3.20"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "b4975062de00106132d0b01b5962c09f7db7d880"
+git-tree-sha1 = "8694b777fe710111c65879fcc1184f8422b6d910"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.12.5"
+version = "1.12.3"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1196,9 +1211,9 @@ version = "2.1.3"
 
 [[deps.SciMLBase]]
 deps = ["ArrayInterfaceCore", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "RecipesBase", "RecursiveArrayTools", "StaticArrays", "Statistics", "Tables", "TreeViews"]
-git-tree-sha1 = "b0e2399e5294543a19bf2ad9ea4ba3bed18ad19e"
+git-tree-sha1 = "fe49d53d715bfbb5df78b965f5d2660781ea151c"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.39.0"
+version = "1.38.3"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1274,9 +1289,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "2c11d7290036fe7aac9038ff312d3b3a2a5bf89e"
+git-tree-sha1 = "c82aaa13b44ea00134f8c9c89819477bd3986ecd"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.4.0"
+version = "1.3.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
@@ -1612,8 +1627,11 @@ version = "3.5.0+0"
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
+# ╠═bcba720d-15a8-4b86-9f02-7d34e617a991
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╠═62b22e27-b50e-442b-b8b3-5ad955c000d2
+# ╠═03d7a0d0-ca03-481c-8104-bd05876762f2
+# ╠═91f27bdb-560f-476c-915e-775ba47650bd
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═96a93b3c-4918-4eca-b537-ed4b5d81c26e
