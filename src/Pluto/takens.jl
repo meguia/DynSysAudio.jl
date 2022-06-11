@@ -23,6 +23,18 @@ using Pipe: @pipe
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../ODESource.jl")
 
+# ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
+html"""
+<style>
+input[type*="range"] {
+	width: 30%;
+}
+</style>
+"""
+
+# ╔═╡ 8937af03-1665-4fd9-8b08-8885205fcdc4
+
+
 # ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
 sdev = PortAudio.devices()
 
@@ -52,12 +64,12 @@ end
 # ╔═╡ 96a93b3c-4918-4eca-b537-ed4b5d81c26e
 md"""
 gain $(@bind g Slider(0:0.02:1.0,default=0.5;show_value=true)) \
-μ2 $(@bind μ2 Slider(-0.3:0.001:0.0,default=-0.15;show_value=true)) \
-μ1 $(@bind μ1 Slider(-0.12:0.001:0.02,default=-0.01;show_value=true)) \
-A $(@bind A Slider(0.0:0.001:0.2,default=0.01;show_value=true)) \
-B $(@bind B Slider(0.0:0.001:0.2,default=0.01;show_value=true)) \
-ω $(@bind ω Slider(0.0:0.001:0.1,default=0.01;show_value=true)) \
-Δt $(@bind Δt Slider(0.001:0.001:0.2,default=0.05;show_value=true)) \
+μ2 $(@bind μ2 Slider(-0.3:0.001:0.0,default=-0.15;show_value=true)) 
+  μ1 $(@bind μ1 Slider(-0.12:0.001:0.02,default=-0.01;show_value=true)) \
+A $(@bind A Slider(0.0:0.001:0.2,default=0.01;show_value=true)) 
+  B $(@bind B Slider(0.0:0.001:0.2,default=0.01;show_value=true)) \
+ω $(@bind ω Slider(-0.1:0.001:0.1,default=0.01;show_value=true)) 
+  Δt $(@bind Δt Slider(0.001:0.001:0.2,default=0.05;show_value=true)) \
 """
 
 # ╔═╡ 6c2a6767-09a2-4692-811a-b116795979b7
@@ -1952,6 +1964,8 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
+# ╠═3f683dd7-0938-454c-a61a-6cde2fb87fce
+# ╠═8937af03-1665-4fd9-8b08-8885205fcdc4
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
@@ -1961,7 +1975,7 @@ version = "0.9.1+5"
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╟─6c2a6767-09a2-4692-811a-b116795979b7
-# ╟─96a93b3c-4918-4eca-b537-ed4b5d81c26e
+# ╠═96a93b3c-4918-4eca-b537-ed4b5d81c26e
 # ╠═918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

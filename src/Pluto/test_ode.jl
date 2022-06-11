@@ -41,8 +41,8 @@ end
 
 # ╔═╡ 03d7a0d0-ca03-481c-8104-bd05876762f2
 function fduff!(du,u,p,t)
-	du[1] = u[2]
-    du[2] = p[1]*(1.0-u[1]*u[1])*u[2]-u[1]+p[2]*cos(p[3]*t)
+    du[1] = u[2]
+    du[2] = -p[1]*u[2]+u[1]*(p[2]-u[1]*u[1])+p[3]*cos(p[4]*t)
 	du
 end	
 
@@ -67,19 +67,31 @@ end
 
 # ╔═╡ 96a93b3c-4918-4eca-b537-ed4b5d81c26e
 md"""
+μ $(@bind μ Slider(0.01:0.01:1.0,default=0.5;show_value=true)) 
+β $(@bind β Slider(-1.0:0.01:2.0,default=0.5;show_value=true)) \
+A $(@bind A Slider(0:0.01:2.0,default=0.0;show_value=true)) 
+ω $(@bind ω Slider(0:0.01:7.0,default=1.0;show_value=true)) \
+Δt $(@bind Δt Slider(0.001:0.001:0.2,default=0.01;show_value=true)) 
 gain $(@bind g Slider(0:0.02:1.0,default=0.5;show_value=true)) \
-μ $(@bind μ Slider(0.01:0.05:1.0,default=0.5;show_value=true)) \
-A $(@bind A Slider(0:0.05:2.0,default=0.0;show_value=true)) \
-ω $(@bind ω Slider(0:0.05:5.0,default=1.0;show_value=true)) \
-Δt $(@bind Δt Slider(0.001:0.001:0.02,default=0.01;show_value=true)) \
 """
+
+# ╔═╡ 904a8ba5-b1f8-4109-ae78-d52e63a8680f
+#ode_source.pars=[0.04,0.79,0.64,0.67]
+#ode_source.dt=0.011
+#ode_source.pars=[0.25,1.0,0.64,1.72]
+
+# ╔═╡ 10376cde-cf13-4afd-8e74-0ed344570f26
+
 
 # ╔═╡ 918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 begin
 	ode_source.gain=g
-	ode_source.pars=[μ,A,ω]
-	ode_source.dt=Δt
+	ode_source.pars=[μ,β,A,ω]
+	ode_source.dt=Δt;
 end	
+
+# ╔═╡ 1f340644-8f2f-4bf5-8a7c-366b67ff7925
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1638,6 +1650,9 @@ version = "3.5.0+0"
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═96a93b3c-4918-4eca-b537-ed4b5d81c26e
+# ╠═904a8ba5-b1f8-4109-ae78-d52e63a8680f
+# ╠═10376cde-cf13-4afd-8e74-0ed344570f26
 # ╠═918e4fa7-3ff0-4d07-84ed-f19d98cbe582
+# ╠═1f340644-8f2f-4bf5-8a7c-366b67ff7925
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
