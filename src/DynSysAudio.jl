@@ -11,13 +11,15 @@ module DynSysAudio
 
     export  NoiseSource,
             SinusoidSource,
-            Sin2Source,
             ODESource,
+            FilterDyn,
+            modify,
             samplerate
 
     include("NoiseSource.jl")
     include("SinusoidSource.jl")
     include("ODESource.jl")
+    include("FilterDyn.jl")
 
 
 end # module

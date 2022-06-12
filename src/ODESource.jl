@@ -31,7 +31,7 @@ samplerate(source::ODESource) = source.samplerate
 
 function unsafe_read!(source::ODESource, buf::Array, frameoffset, framecount)
     tend = source.time+(framecount-1)*source.dt
-    seq = hcat(solve(remake(source.problem;u0=source.uini,tspan=(source.time,tend),p=source.pars),Tsit5(),saveat=source.dt).u...)'
+    seq = hcat(solve(remake(source.problem;u0=source.uini,tspan=(source.time,tend),p=source.pars),RK4(),saveat=source.dt).u...)'
     buf[frameoffset+1:frameoffset+framecount,:] = source.gain*seq[1:framecount,:]
     source.time += framecount*source.dt
     source.uini = seq[end,:]
