@@ -14,6 +14,9 @@ macro bind(def, element)
     end
 end
 
+# ╔═╡ 000cfe82-75fd-4fe0-91da-ede95c7493ee
+using Distributed
+
 # ╔═╡ ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, DSP
 
@@ -26,8 +29,8 @@ using OpenSoundControl, Sockets
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../DynSysAudio.jl")
 
-# ╔═╡ 000cfe82-75fd-4fe0-91da-ede95c7493ee
-Threads.nthreads()
+# ╔═╡ 290d9ec7-3cc4-482a-a34f-d9160666ba0a
+Distributed.myid()
 
 # ╔═╡ 6cc42618-30a7-4769-b99f-3b66b2f3eeb3
 md"""
@@ -39,7 +42,7 @@ Choose the right device
 sdev = PortAudio.devices()
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[4],0,2)
+soundcard = PortAudioStream(sdev[5],0,2; eltype=Float32, samplerate=44100, latency=0.1)
 
 # ╔═╡ 4d2494d7-db4a-466f-88b6-1ae47af2929b
 md"""
@@ -83,9 +86,6 @@ The parameters can be dynamically changed below
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
 ode_source = DynSysAudio.ODESource(Float64, fduff!, 44100, 500.0, [0.1,0.1],[2.0,0.0,1.0,1.0]);
 
-# ╔═╡ 717cca2b-7387-4138-b10e-9c9814014ede
-tone_source = DynSysAudio.SinusoidSource(Float64, 44100, [220,330]);
-
 # ╔═╡ 616ecb51-1b2d-499e-b724-4d13520dec27
 md"""
 ### Begin Audio Thread 
@@ -100,6 +100,13 @@ Using a hipass filter to remove DC and lower frequencies (if hip = FilterDyn(441
 Writing a single data value per buffer to OSC:
 `@pipe read(ode_source, 1u"s") |> modify(hip,_) |> send_osc(sock1,_) |> write(soundcard, _)`
 """
+
+# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+ode_stream = Threads.@threads begin
+    while ode_source.gain>0.0
+        @pipe read(ode_source, 0.04u"s") |> DynSysAudio.modify(hip,_) |> send_osc(sock1,_) |> write(soundcard, _)
+    end
+end
 
 # ╔═╡ 96a93b3c-4918-4eca-b537-ed4b5d81c26e
 md"""
@@ -140,18 +147,17 @@ function send_osc(sock1::UDPSocket,buf)
 	return buf
 end	
 
-# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-ode_stream = Threads.@spawn begin
-    while ode_source.gain>0.0
-        @pipe read(ode_source, 0.01u"s") |> DynSysAudio.modify(hip,_) |> send_osc(sock1,_) |> write(soundcard, _)
-    end
-end
+# ╔═╡ 95888108-8257-4c8d-b54a-08232f152292
+Threads.@threads for i=1:10
+	println("iter $i on $(Threads.threadid())")
+end	
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 OpenSoundControl = "2ff8ee2d-9747-4b2b-b699-45d473b7b9df"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
@@ -177,7 +183,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "553894fe232e62050e2d50abd3eee195ae776e6d"
+project_hash = "e8bbb2aaf4725958ee6ed588ad10e83267743c29"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1727,6 +1733,7 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═000cfe82-75fd-4fe0-91da-ede95c7493ee
+# ╠═290d9ec7-3cc4-482a-a34f-d9160666ba0a
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
@@ -1739,7 +1746,6 @@ version = "3.5.0+0"
 # ╠═91f27bdb-560f-476c-915e-775ba47650bd
 # ╟─69bcdc6d-8a0b-42f0-9fe6-43ca9c8899df
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
-# ╟─717cca2b-7387-4138-b10e-9c9814014ede
 # ╟─616ecb51-1b2d-499e-b724-4d13520dec27
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╟─96a93b3c-4918-4eca-b537-ed4b5d81c26e
@@ -1749,5 +1755,6 @@ version = "3.5.0+0"
 # ╠═df6f5812-9b03-4ece-b56b-ef8b8c06746c
 # ╠═186d08bf-1b46-4b92-86e2-fb2850491c55
 # ╠═4f4230ce-a732-4e72-8765-536774d0ce1b
+# ╠═95888108-8257-4c8d-b54a-08232f152292
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

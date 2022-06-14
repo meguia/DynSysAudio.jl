@@ -39,7 +39,7 @@ sdev = PortAudio.devices()
 sdev[5]
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[4],0,2)
+soundcard = PortAudioStream(sdev[5],0,2)
 
 # ╔═╡ 62b22e27-b50e-442b-b8b3-5ad955c000d2
 function lorenz!(du,u,p,t)
@@ -66,12 +66,12 @@ function thomas!(du,u,p,t)
 end		
 
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2],1:2);
+ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2],2:3);
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
-        @pipe read(ode_source, 0.1u"s") |> write(soundcard, _)
+        @pipe read(ode_source, 0.3u"s") |> write(soundcard, _)
     end
 end
 
@@ -97,7 +97,7 @@ begin
 end	
 
 # ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
-1:ode_source.nchannels
+ode_source.uini=[1.0;1.1;-0.01]
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
