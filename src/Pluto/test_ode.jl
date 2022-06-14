@@ -101,13 +101,6 @@ Writing a single data value per buffer to OSC:
 `@pipe read(ode_source, 1u"s") |> modify(hip,_) |> send_osc(sock1,_) |> write(soundcard, _)`
 """
 
-# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-ode_stream = Threads.@threads begin
-    while ode_source.gain>0.0
-        @pipe read(ode_source, 0.04u"s") |> DynSysAudio.modify(hip,_) |> send_osc(sock1,_) |> write(soundcard, _)
-    end
-end
-
 # ╔═╡ 96a93b3c-4918-4eca-b537-ed4b5d81c26e
 md"""
 μ $(@bind μ Slider(0.01:0.01:1.0,default=0.5;show_value=true)) 
@@ -147,10 +140,12 @@ function send_osc(sock1::UDPSocket,buf)
 	return buf
 end	
 
-# ╔═╡ 95888108-8257-4c8d-b54a-08232f152292
-Threads.@threads for i=1:10
-	println("iter $i on $(Threads.threadid())")
-end	
+# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+ode_stream = Threads.@spawn begin
+    while ode_source.gain>0.0
+        @pipe read(ode_source, 0.1u"s") |> DynSysAudio.modify(hip,_) |> send_osc(sock1,_) |> write(soundcard, _)
+    end
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1755,6 +1750,5 @@ version = "3.5.0+0"
 # ╠═df6f5812-9b03-4ece-b56b-ef8b8c06746c
 # ╠═186d08bf-1b46-4b92-86e2-fb2850491c55
 # ╠═4f4230ce-a732-4e72-8765-536774d0ce1b
-# ╠═95888108-8257-4c8d-b54a-08232f152292
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
