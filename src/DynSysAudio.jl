@@ -6,12 +6,15 @@ module DynSysAudio
     using SampledSignals
     using DifferentialEquations
     using Unitful
+    using DSP
 
     import SampledSignals: nchannels, samplerate, unsafe_read!
 
     export  ODESource,
             FilterDyn,
             modify,
+            step!,
+            mixer,
             samplerate
 
     include("ODESource.jl")
