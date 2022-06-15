@@ -78,6 +78,7 @@ ode_source.nchannels
 function send_osc(sock::UDPSocket,buf)
 	msg1 = OpenSoundControl.message("/ode", "ddd",buf[end,1],buf[end,2], buf[end,3])
 	send(sock, ip"127.0.0.1", 7779, msg1.data)
+	sleep(0.01)
 	return buf
 end	
 
