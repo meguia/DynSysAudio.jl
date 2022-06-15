@@ -35,11 +35,8 @@ input[type*="range"] {
 # ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
 sdev = PortAudio.devices()
 
-# ╔═╡ bcba720d-15a8-4b86-9f02-7d34e617a991
-sdev[5]
-
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[5],0,2)
+soundcard = PortAudioStream(sdev[4],0,2)
 
 # ╔═╡ 62b22e27-b50e-442b-b8b3-5ad955c000d2
 function lorenz!(du,u,p,t)
@@ -66,18 +63,24 @@ function thomas!(du,u,p,t)
 end		
 
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2],2:3);
+ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2]);
+
+# ╔═╡ abd92eb6-6963-43d8-b277-c6940d56ecde
+mapping = [1 0; 0 1; 0 0];
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╠═╡ disabled = true
+#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
-        @pipe read(ode_source, 0.3u"s") |> write(soundcard, _)
+        @pipe read(ode_source, 0.04u"s") |> mixer(mapping,_) |> write(soundcard, _)
     end
 end
+  ╠═╡ =#
 
 # ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
 md"""
-gain $(@bind g Slider(0:0.001:1.0,default=0.5;show_value=true)) \
+gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) \
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) \
@@ -98,6 +101,11 @@ end
 
 # ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
 ode_source.uini=[1.0;1.1;-0.01]
+
+# ╔═╡ 97356372-6135-46fd-8757-fa71c20e0f18
+#=╠═╡
+ode_stream
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1980,17 +1988,18 @@ version = "0.9.1+5"
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
-# ╠═bcba720d-15a8-4b86-9f02-7d34e617a991
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╟─62b22e27-b50e-442b-b8b3-5ad955c000d2
 # ╠═70081217-e4d0-4633-a30a-30ed96ce03b1
 # ╠═53cdcf81-3a83-42f0-a338-b32094200298
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
+# ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
 # ╠═5caeb4e7-1a8a-4ff1-885f-155aa83fd341
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╠═98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╠═f69b0c75-f868-4d0e-9cde-230ee32dc184
 # ╠═9fa17e98-7a05-4473-9d38-f0f5f348da60
+# ╠═97356372-6135-46fd-8757-fa71c20e0f18
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
