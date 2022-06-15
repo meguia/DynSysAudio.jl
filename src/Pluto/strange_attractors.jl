@@ -74,13 +74,14 @@ gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) \
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) \
+reset IC $(@bind resetic Button("reset!"))
 """
 
 # ╔═╡ 5caeb4e7-1a8a-4ff1-885f-155aa83fd341
-sol = solve(ODEProblem(thomas!,[1.0;1.1;-0.01],(0.0,300.0),[a,b]));
+sol = solve(ODEProblem(thomas!,ode_source.uini,(0.0,500.0),[a,b]));
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
- plot(sol,vars=(1,2,3),label="lorenz")
+ plot(sol,vars=(1,2,3),label="thomas")
 
 # ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
 begin
@@ -90,7 +91,10 @@ begin
 end	
 
 # ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
-ode_source.uini=[1.0;1.1;-0.01]
+begin
+	resetic
+	ode_source.uini=[1.0;1.1;-0.01]
+end	
 
 # ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
 sock1 = UDPSocket()
@@ -103,14 +107,19 @@ function send_osc(sock::UDPSocket,buf)
 end	
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╠═╡ disabled = true
+#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
         @pipe read(ode_source, 0.05u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
     end
 end
+  ╠═╡ =#
 
 # ╔═╡ 97356372-6135-46fd-8757-fa71c20e0f18
+#=╠═╡
 ode_stream
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
