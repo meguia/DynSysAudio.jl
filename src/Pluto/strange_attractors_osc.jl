@@ -15,10 +15,16 @@ macro bind(def, element)
 end
 
 # ╔═╡ ca79dbd0-e662-11ec-3fd3-952bfc9d3247
-using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, Plots
+using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, Plots, OpenSoundControl, Sockets
 
 # ╔═╡ 1a5f71e9-0451-4e76-9526-e6f283ea9531
 using Pipe: @pipe
+
+# ╔═╡ 3fd2ca36-dce5-41d9-a4f1-f1f95b1ec593
+using Dates
+
+# ╔═╡ c309ffb3-a956-448c-9173-41ffb6f2851a
+using JSON3
 
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../ODESource.jl")
@@ -63,14 +69,11 @@ ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2]);
 mapping = [1 0; 0 1; 0 0];
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═╡ disabled = true
-#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
         @pipe read(ode_source, 0.05u"s") |> mixer(mapping,_) |> write(soundcard, _)
     end
 end
-  ╠═╡ =#
 
 # ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
 @bind ticks Clock(0.1,true)
@@ -97,11 +100,6 @@ end;
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
 plot(sol,vars=(1,2,3),c=:yellow,label="thomas",size=(800,600))
 
-# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
-# some values
-#a = 1.47 b = 0.195 dt = 0.035
-#a = 1.12 b = 0.2 dt = 0.06
-
 # ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
 begin
 	ode_source.gain=g
@@ -115,6 +113,24 @@ begin
 	ode_source.uini=[1.0;1.1;-0.001]
 end	
 
+# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# some values
+#a = 1.47 b = 0.195 dt = 0.035
+#a = 1.12 b = 0.2 dt = 0.06
+
+# ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
+sock1 = UDPSocket()
+
+# ╔═╡ 581fc3ad-9a1a-4e05-8ece-a89e4217088a
+function send_osc(sock::UDPSocket,buf)
+	strarr = JSON3.write(buf[1:100:end,:])
+	#msg1 = OpenSoundControl.message("/ode", "ddd",buf[end,1],buf[end,2], buf[end,3])
+	msg1 = OpenSoundControl.message("/odes", "s",strarr)
+	send(sock, ip"127.0.0.1", 7779, msg1.data)
+	return buf
+end	
+
+
 # ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
 html"""
 <style>
@@ -127,16 +143,22 @@ input[type*="range"] {
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+OpenSoundControl = "2ff8ee2d-9747-4b2b-b699-45d473b7b9df"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 PortAudio = "80ea8bcb-4634-5cb3-8ee8-a132660d1d2d"
 SampledSignals = "bd7594eb-a658-542f-9e75-4c4d8908c167"
+Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DifferentialEquations = "~7.1.0"
+JSON3 = "~1.9.5"
+OpenSoundControl = "~1.0.0"
 Pipe = "~1.3.0"
 Plots = "~1.29.1"
 PlutoUI = "~0.7.39"
@@ -825,6 +847,12 @@ git-tree-sha1 = "3c837543ddb02250ef42f4738347454f95079d4e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.3"
 
+[[deps.JSON3]]
+deps = ["Dates", "Mmap", "Parsers", "StructTypes", "UUIDs"]
+git-tree-sha1 = "fd6f0cae36f42525567108a42c1c674af2ac620d"
+uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+version = "1.9.5"
+
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b53380851c6e6664204efb2e62cd24fa5c47e4ba"
@@ -1142,6 +1170,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "ab05aa4cc89736e95915b01e7279e61b1bfe33b8"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
 version = "1.1.14+0"
+
+[[deps.OpenSoundControl]]
+deps = ["Printf", "Test"]
+git-tree-sha1 = "891f8602af7af6324354601e726ae7b48c41fdab"
+uuid = "2ff8ee2d-9747-4b2b-b699-45d473b7b9df"
+version = "1.0.0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1552,6 +1586,12 @@ deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
 git-tree-sha1 = "9abba8f8fb8458e9adf07c8a2377a070674a24f1"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 version = "0.6.8"
+
+[[deps.StructTypes]]
+deps = ["Dates", "UUIDs"]
+git-tree-sha1 = "d24a825a95a6d98c385001212dc9020d609f2d4f"
+uuid = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
+version = "1.8.1"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1979,12 +2019,13 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
+# ╠═3fd2ca36-dce5-41d9-a4f1-f1f95b1ec593
 # ╠═6793be34-9055-403f-a16f-90c57201f843
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╟─62b22e27-b50e-442b-b8b3-5ad955c000d2
-# ╟─70081217-e4d0-4633-a30a-30ed96ce03b1
+# ╠═70081217-e4d0-4633-a30a-30ed96ce03b1
 # ╠═53cdcf81-3a83-42f0-a338-b32094200298
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
@@ -1997,6 +2038,9 @@ version = "0.9.1+5"
 # ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184
 # ╟─9fa17e98-7a05-4473-9d38-f0f5f348da60
+# ╠═04c99f26-9c42-46cb-b9ef-d3a0927093b9
+# ╠═c309ffb3-a956-448c-9173-41ffb6f2851a
+# ╠═581fc3ad-9a1a-4e05-8ece-a89e4217088a
 # ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
