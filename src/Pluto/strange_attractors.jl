@@ -88,7 +88,7 @@ end
 # ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
 begin
 	resetic
-	ode_source.uini=[1.0;1.1;-0.01]
+	ode_source.uini=[1.0;1.1;-0.001]
 end	
 
 # ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
@@ -116,7 +116,7 @@ begin
 		end
 		return buf
 	end	
-	OSCtimer = Timer(_->enablesendOSC(), 0, interval=0.1);
+	OSCtimer = Timer(_->enablesendOSC(), 0, interval=0.01);
 end
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
