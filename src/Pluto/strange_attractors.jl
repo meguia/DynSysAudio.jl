@@ -75,15 +75,14 @@ end
 # ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
 @bind ticks Clock(0.1,true)
 
-# ╔═╡ c010b4f3-d615-42d5-8c0b-1285b6f54de1
-plot_thread
-
 # ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
 md"""
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) 
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) 
 gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
+azimut $(@bind az Slider(0:5:90,default=60;show_value=true)) 
+elevation $(@bind el Slider(0:5:90,default=30;show_value=true)) \
 reset IC $(@bind resetic Button("reset!")) 
 tail $(@bind tail Slider(30:50:500,default=100;show_value=true)) 
 """
@@ -95,7 +94,8 @@ begin
 end;
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
-plot(sol,vars=(1,2,3),c=:yellow,label="thomas",size=(800,600))
+plot(sol,vars=(1,2,3),c=:yellow,label="thomas",size=(800,600), camera = (az, el))
+
 
 # ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # some values
@@ -1992,7 +1992,6 @@ version = "0.9.1+5"
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
 # ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
-# ╠═c010b4f3-d615-42d5-8c0b-1285b6f54de1
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184

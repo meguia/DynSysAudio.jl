@@ -68,19 +68,6 @@ ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2]);
 # ╔═╡ abd92eb6-6963-43d8-b277-c6940d56ecde
 mapping = [1 0; 0 1; 0 0];
 
-# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-ode_stream = Threads.@spawn begin
-    while ode_source.gain>0.0
-        @pipe read(ode_source, 0.05u"s") |> mixer(mapping,_) |> write(soundcard, _)
-    end
-end
-
-# ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
-@bind ticks Clock(0.1,true)
-
-# ╔═╡ c010b4f3-d615-42d5-8c0b-1285b6f54de1
-plot_thread
-
 # ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
 md"""
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) 
@@ -92,13 +79,15 @@ tail $(@bind tail Slider(30:50:500,default=100;show_value=true))
 """
 
 # ╔═╡ 46107d77-d3f6-4432-b269-7bb67eda8e78
-begin
-	ticks
-	sol = solve(ODEProblem(thomas!,ode_source.uini,(ode_source.time,ode_source.time+tail),[a,b]));
-end;
+sol = solve(ODEProblem(thomas!,ode_source.uini,(ode_source.time,ode_source.time+tail),[a,b]));
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
 plot(sol,vars=(1,2,3),c=:yellow,label="thomas",size=(800,600))
+
+# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# some values
+#a = 1.47 b = 0.195 dt = 0.035
+#a = 1.12 b = 0.2 dt = 0.06
 
 # ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
 begin
@@ -113,11 +102,6 @@ begin
 	ode_source.uini=[1.0;1.1;-0.001]
 end	
 
-# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
-# some values
-#a = 1.47 b = 0.195 dt = 0.035
-#a = 1.12 b = 0.2 dt = 0.06
-
 # ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
 sock1 = UDPSocket()
 
@@ -130,6 +114,13 @@ function send_osc(sock::UDPSocket,buf)
 	return buf
 end	
 
+
+# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+ode_stream = Threads.@spawn begin
+    while ode_source.gain>0.0
+        @pipe read(ode_source, 0.05u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
+    end
+end
 
 # ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
 html"""
@@ -2031,11 +2022,9 @@ version = "0.9.1+5"
 # ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
 # ╠═46107d77-d3f6-4432-b269-7bb67eda8e78
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
 # ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
-# ╠═c010b4f3-d615-42d5-8c0b-1285b6f54de1
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
-# ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# ╟─17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184
 # ╟─9fa17e98-7a05-4473-9d38-f0f5f348da60
 # ╠═04c99f26-9c42-46cb-b9ef-d3a0927093b9
