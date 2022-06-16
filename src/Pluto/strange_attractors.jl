@@ -23,15 +23,6 @@ using Pipe: @pipe
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../ODESource.jl")
 
-# ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
-html"""
-<style>
-input[type*="range"] {
-	width: 30%;
-}
-</style>
-"""
-
 # ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
 sdev = PortAudio.devices()
 
@@ -70,18 +61,19 @@ mapping = [1 0; 0 1; 0 0];
 
 # ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
 md"""
-gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
-a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) \
+a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) 
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
-Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) \
-reset IC $(@bind resetic Button("reset!"))
+Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) 
+gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
+reset IC $(@bind resetic Button("reset!")) 
+tail $(@bind tail Slider(30:50:500,default=100;show_value=true)) 
 """
 
 # ╔═╡ 5caeb4e7-1a8a-4ff1-885f-155aa83fd341
-sol = solve(ODEProblem(thomas!,ode_source.uini,(0.0,500.0),[a,b]));
+sol = solve(ODEProblem(thomas!,ode_source.uini,(ode_source.time,ode_source.time+tail),[a,b]));
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
- plot(sol,vars=(1,2,3),label="thomas")
+ plot(sol,vars=(1,2,3),c=:yellow,label="thomas")
 
 # ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
 begin
@@ -107,19 +99,26 @@ function send_osc(sock::UDPSocket,buf)
 end	
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═╡ disabled = true
-#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
         @pipe read(ode_source, 0.05u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
     end
 end
-  ╠═╡ =#
 
 # ╔═╡ 97356372-6135-46fd-8757-fa71c20e0f18
-#=╠═╡
 ode_stream
-  ╠═╡ =#
+
+# ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
+html"""
+<style>
+input[type*="range"] {
+	width: 30%;
+}
+</style>
+"""
+
+# ╔═╡ 6793be34-9055-403f-a16f-90c57201f843
+theme(:dark)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1984,7 +1983,6 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
-# ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
@@ -1996,12 +1994,14 @@ version = "0.9.1+5"
 # ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
 # ╠═5caeb4e7-1a8a-4ff1-885f-155aa83fd341
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
+# ╟─bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╠═98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╠═f69b0c75-f868-4d0e-9cde-230ee32dc184
 # ╠═9fa17e98-7a05-4473-9d38-f0f5f348da60
 # ╠═97356372-6135-46fd-8757-fa71c20e0f18
 # ╠═04c99f26-9c42-46cb-b9ef-d3a0927093b9
 # ╠═581fc3ad-9a1a-4e05-8ece-a89e4217088a
+# ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
+# ╠═6793be34-9055-403f-a16f-90c57201f843
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

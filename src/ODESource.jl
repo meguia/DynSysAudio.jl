@@ -2,7 +2,6 @@ import SampledSignals: nchannels, samplerate, unsafe_read!
 
 mutable struct ODESource{T} <: SampleSource
     samplerate::Float64
-    timescale::Float64
     nchannels::Int
     time::Float64
     dt::Float64
@@ -13,15 +12,14 @@ mutable struct ODESource{T} <: SampleSource
 end
 
 
-function ODESource(eltype, system::Function, samplerate::Number, timescale::Number, start_point::Array, pars::Array)
+function ODESource(eltype, system::Function, samplerate::Number, dt::Number, start_point::Array, pars::Array)
     nchannels = length(start_point)
     time = 0.0
     gain = 0.1
     tspan = (0.0, 100.0)
-    dt = timescale/samplerate
     uini = start_point
     problem = ODEProblem(system,start_point,tspan,pars)
-    ODESource{eltype}(Float64(samplerate), Float64(timescale),nchannels, time, dt, uini, pars, gain,problem)
+    ODESource{eltype}(Float64(samplerate), nchannels, time, dt, uini, pars, gain,problem)
 end
 
 
@@ -31,7 +29,7 @@ samplerate(source::ODESource) = source.samplerate
 
 
 function unsafe_read!(source::ODESource, buf::Array, frameoffset, framecount)
-    tend = source.time+(framecount-1)*source.dt
+    tend = source.time+framecount*source.dt
     seq = hcat(solve(remake(source.problem;u0=source.uini,tspan=(source.time,tend),p=source.pars),RK4(),saveat=source.dt).u...)'
     buf[frameoffset+1:frameoffset+framecount,:] = source.gain*seq[1:framecount,:]
     source.time += framecount*source.dt
@@ -41,10 +39,11 @@ end
 
 function step!(source::ODESource, framecount)
     tend = source.time+framecount*source.dt
-    seq = hcat(solve(remake(source.problem;u0=source.uini,tspan=(source.time,tend),p=source.pars),Tsit5(),saveat=source.dt).u...)'
+    sol=solve(remake(source.problem;u0=source.uini,tspan=(source.time,tend),p=source.pars),Tsit5(),saveat=source.dt)
+    seq = hcat(sol.u...)'
     source.time += framecount*source.dt
     source.uini = seq[end,:]
-    return source.gain*seq[1:framecount,:]
+    return seq[1:framecount,:]
 end
 
 function mixer(mapping::Matrix,buf::Union{Array,SampleBuf})
