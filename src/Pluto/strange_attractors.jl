@@ -23,6 +23,9 @@ using Pipe: @pipe
 # ╔═╡ 3fd2ca36-dce5-41d9-a4f1-f1f95b1ec593
 using Dates
 
+# ╔═╡ c309ffb3-a956-448c-9173-41ffb6f2851a
+using JSON3
+
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../ODESource.jl")
 
@@ -94,14 +97,12 @@ end
 # ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
 sock1 = UDPSocket()
 
-# ╔═╡ c309ffb3-a956-448c-9173-41ffb6f2851a
-
-
 # ╔═╡ 581fc3ad-9a1a-4e05-8ece-a89e4217088a
 function send_osc(sock::UDPSocket,buf)
-	msg1 = OpenSoundControl.message("/ode", "ddd",buf[end,1],buf[end,2], buf[end,3])
+	strarr = JSON3.write(buf[1:100:end,:])
+	#msg1 = OpenSoundControl.message("/ode", "ddd",buf[end,1],buf[end,2], buf[end,3])
+	msg1 = OpenSoundControl.message("/odes", "s",strarr)
 	send(sock, ip"127.0.0.1", 7779, msg1.data)
-
 	return buf
 end	
 
@@ -116,8 +117,14 @@ end
 # ╔═╡ 97356372-6135-46fd-8757-fa71c20e0f18
 ode_stream
 
+# ╔═╡ 8b95fa98-95a3-4dbb-af50-2f5d4537c988
+
+
 # ╔═╡ a07b7dcc-458e-4b8a-a563-c36abc5774db
 #close(OSCtimer)
+
+# ╔═╡ fe2cbfab-2b45-4bad-8ef4-f0c4a7cec5e7
+@pipe read(ode_source, 0.04u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
 
 # ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
 html"""
@@ -136,6 +143,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 OpenSoundControl = "2ff8ee2d-9747-4b2b-b699-45d473b7b9df"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -147,6 +155,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DifferentialEquations = "~7.1.0"
+JSON3 = "~1.9.5"
 OpenSoundControl = "~1.0.0"
 Pipe = "~1.3.0"
 Plots = "~1.29.1"
@@ -835,6 +844,12 @@ deps = ["Dates", "Mmap", "Parsers", "Unicode"]
 git-tree-sha1 = "3c837543ddb02250ef42f4738347454f95079d4e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.3"
+
+[[deps.JSON3]]
+deps = ["Dates", "Mmap", "Parsers", "StructTypes", "UUIDs"]
+git-tree-sha1 = "fd6f0cae36f42525567108a42c1c674af2ac620d"
+uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+version = "1.9.5"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1570,6 +1585,12 @@ git-tree-sha1 = "9abba8f8fb8458e9adf07c8a2377a070674a24f1"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 version = "0.6.8"
 
+[[deps.StructTypes]]
+deps = ["Dates", "UUIDs"]
+git-tree-sha1 = "d24a825a95a6d98c385001212dc9020d609f2d4f"
+uuid = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
+version = "1.8.1"
+
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
@@ -2015,7 +2036,9 @@ version = "0.9.1+5"
 # ╠═04c99f26-9c42-46cb-b9ef-d3a0927093b9
 # ╠═c309ffb3-a956-448c-9173-41ffb6f2851a
 # ╠═581fc3ad-9a1a-4e05-8ece-a89e4217088a
+# ╠═8b95fa98-95a3-4dbb-af50-2f5d4537c988
 # ╠═a07b7dcc-458e-4b8a-a563-c36abc5774db
+# ╠═fe2cbfab-2b45-4bad-8ef4-f0c4a7cec5e7
 # ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
 # ╠═6793be34-9055-403f-a16f-90c57201f843
 # ╟─00000000-0000-0000-0000-000000000001
