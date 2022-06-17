@@ -26,6 +26,9 @@ using OpenSoundControl, Sockets
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../DynSysAudio.jl")
 
+# ╔═╡ 32e9c309-b40f-406b-9c30-2b2d4803f179
+theme(:dark)
+
 # ╔═╡ 6cc42618-30a7-4769-b99f-3b66b2f3eeb3
 md"""
 ### Audio output config
@@ -70,6 +73,13 @@ function fbrussel!(du,u,p,t)
 	du
 end	
 
+# ╔═╡ a441dfa1-207e-4ab4-afbc-9df3a9848998
+function thomas!(du,u,p,t)
+	du[1]=sin(p[1]*u[2])-p[2]*u[1]
+	du[2]=sin(p[1]*u[3])-p[2]*u[2]
+	du[3]=sin(p[1]*u[1])-p[2]*u[3]
+end		
+
 # ╔═╡ 69bcdc6d-8a0b-42f0-9fe6-43ca9c8899df
 md"""
 ### ODESource
@@ -106,8 +116,11 @@ takes only the first two variables but any linear combinations of variables can 
 
 """
 
-# ╔═╡ 32e9c309-b40f-406b-9c30-2b2d4803f179
-theme(:dark)
+# ╔═╡ 098e99e0-740d-4431-b340-f06d0166fee5
+mapping = [1 0; 0 1; 0 0]; # for 3D systems
+
+# ╔═╡ 0a5a8812-9fa7-42ab-a5e5-fa24fb614437
+@bind ticks Clock(0.1,true)
 
 # ╔═╡ 96a93b3c-4918-4eca-b537-ed4b5d81c26e
 md"""
@@ -122,15 +135,18 @@ tail $(@bind tail Slider(10:10:1000,default=100;show_value=true)) \
 """
 
 # ╔═╡ af80aa5a-e2e1-4335-82b2-71dd1d73a188
-sol=solve(ODEProblem(fduff!,ode_source.uini,(ode_source.time,ode_source.time+tail),[μ,β,A,ω]));
+begin
+	ticks
+	sol=solve(ODEProblem(fduff!,ode_source.uini,(ode_source.time,ode_source.time+tail),[μ,β,A,ω]));
+end;
 
 # ╔═╡ 418a9afa-413e-4390-bae7-31092c7c3247
-plot(sol,vars=(1,2),xlims=(-3,3),ylims=(-3,3),legend=false,c=:yellow)
+plot(sol,vars=(1,2),xlims=(-2.5,2.5),ylims=(-2,2),legend=false,c=:yellow)
 
 # ╔═╡ 904a8ba5-b1f8-4109-ae78-d52e63a8680f
 #ode_source.pars=[0.04,0.79,0.64,0.67]
 #ode_source.dt=0.011
-#ode_source.pars=[0.25,1.0,0.64,1.72]
+#ode_source.pars=[0.25,1.0,0.65,1.86]
 #ode_source.pars=[0.02,0.79,0.64,0.25]
 #ode_source.dt=0.007
 
@@ -138,14 +154,11 @@ plot(sol,vars=(1,2),xlims=(-3,3),ylims=(-3,3),legend=false,c=:yellow)
 hip = DynSysAudio.FilterDyn(44100.0,1;lcut=40.0);
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═╡ disabled = true
-#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
         @pipe read(ode_source, 0.1u"s") |> DynSysAudio.modify(hip,_)  |> write(soundcard, _)
     end
 end
-  ╠═╡ =#
 
 # ╔═╡ 918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 begin
@@ -2032,24 +2045,27 @@ version = "0.9.1+5"
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
+# ╠═32e9c309-b40f-406b-9c30-2b2d4803f179
 # ╟─6cc42618-30a7-4769-b99f-3b66b2f3eeb3
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
 # ╠═3cbbf922-effe-4a20-9496-86f73cf2c7b3
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╟─4d2494d7-db4a-466f-88b6-1ae47af2929b
-# ╠═62b22e27-b50e-442b-b8b3-5ad955c000d2
+# ╟─62b22e27-b50e-442b-b8b3-5ad955c000d2
 # ╠═03d7a0d0-ca03-481c-8104-bd05876762f2
-# ╠═91f27bdb-560f-476c-915e-775ba47650bd
+# ╟─91f27bdb-560f-476c-915e-775ba47650bd
+# ╠═a441dfa1-207e-4ab4-afbc-9df3a9848998
 # ╟─69bcdc6d-8a0b-42f0-9fe6-43ca9c8899df
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╟─616ecb51-1b2d-499e-b724-4d13520dec27
+# ╠═098e99e0-740d-4431-b340-f06d0166fee5
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╠═0a5a8812-9fa7-42ab-a5e5-fa24fb614437
 # ╠═af80aa5a-e2e1-4335-82b2-71dd1d73a188
-# ╠═32e9c309-b40f-406b-9c30-2b2d4803f179
-# ╠═418a9afa-413e-4390-bae7-31092c7c3247
+# ╟─418a9afa-413e-4390-bae7-31092c7c3247
 # ╟─96a93b3c-4918-4eca-b537-ed4b5d81c26e
+# ╠═904a8ba5-b1f8-4109-ae78-d52e63a8680f
 # ╠═918e4fa7-3ff0-4d07-84ed-f19d98cbe582
-# ╟─904a8ba5-b1f8-4109-ae78-d52e63a8680f
 # ╠═1538f521-6bdb-4d4c-937d-b52668e49263
 # ╠═df6f5812-9b03-4ece-b56b-ef8b8c06746c
 # ╠═186d08bf-1b46-4b92-86e2-fb2850491c55

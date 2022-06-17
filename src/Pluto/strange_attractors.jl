@@ -15,13 +15,13 @@ macro bind(def, element)
 end
 
 # ╔═╡ ca79dbd0-e662-11ec-3fd3-952bfc9d3247
-using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, Plots
+using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, DSP, Plots
 
 # ╔═╡ 1a5f71e9-0451-4e76-9526-e6f283ea9531
 using Pipe: @pipe
 
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
-include("../ODESource.jl")
+include("../DynSysAudio.jl")
 
 # ╔═╡ 6793be34-9055-403f-a16f-90c57201f843
 theme(:dark)
@@ -57,20 +57,17 @@ function thomas!(du,u,p,t)
 end		
 
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2]);
+ode_source = DynSysAudio.ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2]);
 
 # ╔═╡ abd92eb6-6963-43d8-b277-c6940d56ecde
 mapping = [1 0; 0 1; 0 0];
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═╡ disabled = true
-#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
-        @pipe read(ode_source, 0.05u"s") |> mixer(mapping,_) |> write(soundcard, _)
+        @pipe read(ode_source, 0.05u"s") |> DynSysAudio.mixer(mapping,_) |> write(soundcard, _)
     end
 end
-  ╠═╡ =#
 
 # ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
 @bind ticks Clock(0.1,true)
@@ -127,6 +124,7 @@ input[type*="range"] {
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -136,6 +134,7 @@ SampledSignals = "bd7594eb-a658-542f-9e75-4c4d8908c167"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+DSP = "~0.7.6"
 DifferentialEquations = "~7.1.0"
 Pipe = "~1.3.0"
 Plots = "~1.29.1"
@@ -1991,7 +1990,7 @@ version = "0.9.1+5"
 # ╠═46107d77-d3f6-4432-b269-7bb67eda8e78
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
-# ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
+# ╟─bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184
