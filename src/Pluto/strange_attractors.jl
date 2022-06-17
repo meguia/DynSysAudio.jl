@@ -112,41 +112,6 @@ begin
 	ode_source.uini=[1.0;1.1;-0.001]
 end	
 
-<<<<<<< HEAD
-# ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
-sock1 = UDPSocket()
-
-# ╔═╡ 581fc3ad-9a1a-4e05-8ece-a89e4217088a
-function send_osc(sock::UDPSocket,buf)
-	strarr = JSON3.write(buf[1:16:end,:])
-	#msg1 = OpenSoundControl.message("/ode", "ddd",buf[end,1],buf[end,2], buf[end,3])
-	msg1 = OpenSoundControl.message("/odes", "s",strarr)
-	send(sock, ip"127.0.0.1", 7779, msg1.data)
-	return buf
-end	
-
-
-# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
-ode_stream = Threads.@spawn begin
-    while ode_source.gain>0.0
-        @pipe read(ode_source, 0.04u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
-    end
-end
-
-# ╔═╡ 97356372-6135-46fd-8757-fa71c20e0f18
-ode_stream
-
-# ╔═╡ 8b95fa98-95a3-4dbb-af50-2f5d4537c988
-
-
-# ╔═╡ a07b7dcc-458e-4b8a-a563-c36abc5774db
-#close(OSCtimer)
-
-# ╔═╡ fe2cbfab-2b45-4bad-8ef4-f0c4a7cec5e7
-@pipe read(ode_source, 0.04u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
-
-=======
->>>>>>> 63c2ac242b82dd4fb108095270da9017e3f5b8bf
 # ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
 html"""
 <style>
