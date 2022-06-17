@@ -13,9 +13,16 @@ boolean showControls = true;
 ControlP5 controlP5;
 float multiplier = 10.0;
 
+float cameraRotateX;
+float cameraRotateY;
+float cameraSpeed;
+boolean showAsTrail = true  ;
+
 void setup() {
   for (int i = 0; i < ntrailSize; i++) positionsBuffer.add(new PVector());
   size(640, 480, P3D);
+  cameraSpeed = TWO_PI / width*2;
+  cameraRotateY = -PI/6;
   smooth();
   oscP5 = new OscP5(this, 7779);
 
@@ -28,37 +35,17 @@ void setup() {
     .setColorValue(0xffff88ff)
     .setColorLabel(0xffdddddd);
   controlP5.addSlider("trailSize")
-    .setRange(1, 10000)
+    .setRange(1, 200)
     .setValue(100)
     .setPosition(60, 80)
     .setSize(10, 100)
     .setColorValue(0xffff88ff)
     .setColorLabel(0xffdddddd);
-}
-
-void segmentedAxes() {
-  stroke(255);
-  pushMatrix();
-  rotateX(PI);
-  fill(255,20);
-  rect(-10000,-10000,10000,10000);
-  popMatrix();
-  pushMatrix();
-  rotateY(PI);
-  fill(255,20);
-  rect(-10000,-10000,10000,10000);
-  popMatrix();
-  pushMatrix();
-  rotateZ(PI);
-  fill(255,20);
-  rect(-10000,-10000,10000,10000);
-  popMatrix();
-  /*line(-10000, 0, 0, 10000, 0, 0);
-  line(0, -10000, 0, 0, 10000, 0);
-  line(0, 0, -10000, 0, 0, 10000);*/
+    sphereDetail(10);
 }
 
 void draw() {
+  lights();
   background(0);
   fill(255);
   directionalLight(126, 126, 126, 0, 0, -1);
@@ -80,27 +67,42 @@ void draw() {
   pushMatrix();
 
   translate(width/2+30, height/2+10);
-  //rotateX(.1);
-  //rotateY(-.2);
-  //segmentedAxes();
-
-  stroke(255);
-  noFill();
-
-  beginShape();
-  for (int i = 0; i < positionsBuffer.size(); i++) { //PVector position: positionsBuffer) {
-    PVector position = positionsBuffer.get(i);
-    curveVertex(position.x*multiplier, position.y*multiplier, position.z*multiplier*2);
-  }
-  endShape();
-
-  pushMatrix();
-  fill(255);
+  rotateX(cameraRotateY);
+  rotateY(cameraRotateX);
+  
   PVector lastPosition = positionsBuffer.get(positionsBuffer.size()-1);
-  translate(lastPosition.x*multiplier, lastPosition.y*multiplier, lastPosition.z*multiplier*2);
-  //ellipse(0, 0, 10, 10);
-  sphere(10);
-  popMatrix();
+  
+  if (showAsTrail) {
+    stroke(255);
+    noFill();
+  
+    beginShape();
+    for (int i = 0; i < positionsBuffer.size(); i++) { //PVector position: positionsBuffer) {
+      PVector position = positionsBuffer.get(i);
+      curveVertex(position.x*multiplier, position.y*multiplier, position.z*multiplier*2);
+    }
+    endShape();
+  
+    pushMatrix();
+    stroke(#34E8DD);    
+    translate(lastPosition.x*multiplier, lastPosition.y*multiplier, lastPosition.z*multiplier*2);
+    sphere(10);
+    popMatrix();
+  } else {
+    stroke(255);
+    noFill();
+  
+    beginShape();
+    for (int i = 0; i < positionsBuffer.size(); i++) { //PVector position: positionsBuffer) {
+      PVector position = positionsBuffer.get(i);
+      pushMatrix();
+      translate(position.x*multiplier, position.y*multiplier, position.z*multiplier*2);
+      //ellipse(0,0,10,10);
+      sphere(2);
+      popMatrix();
+    }
+    endShape();
+  }
 
   popMatrix();
   text(lastPosition.x, 10, 20);
@@ -116,12 +118,27 @@ void oscEvent(OscMessage mensajeOSC) {
       (float)mensajeOSC.get(1).doubleValue(),
       (float)mensajeOSC.get(2).doubleValue());
     positionsBuffer.add(newPos);
+  } else if (mensajeOSC.addrPattern().equals("/odes")) {
+    String jsonMsg = mensajeOSC.get(0).stringValue();
+    JSONArray json = parseJSONArray(jsonMsg);
+    positionsBuffer.clear();
+    for (int i = 0; i < json.size(); i+= 3) {
+      PVector newPos = new PVector(json.getFloat(i),json.getFloat(i+1),json.getFloat(i+2));
+      positionsBuffer.add(newPos);
+    }
+    
   }
+}
+void mouseMoved() {
+  cameraRotateX += (mouseX - pmouseX) * cameraSpeed;
+  cameraRotateY += (pmouseY - mouseY) * cameraSpeed;
 }
 
 void keyPressed() {
   if (key==' ') {
     showControls = !showControls;
+  } else if (key == 't')  {
+    showAsTrail = !showAsTrail;
   }
 }
 

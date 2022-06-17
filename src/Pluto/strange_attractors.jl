@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.9
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -15,25 +15,22 @@ macro bind(def, element)
 end
 
 # ╔═╡ ca79dbd0-e662-11ec-3fd3-952bfc9d3247
-using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, Plots, OpenSoundControl, Sockets
+using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, Plots
 
 # ╔═╡ 1a5f71e9-0451-4e76-9526-e6f283ea9531
 using Pipe: @pipe
 
-# ╔═╡ 3fd2ca36-dce5-41d9-a4f1-f1f95b1ec593
-using Dates
-
-# ╔═╡ c309ffb3-a956-448c-9173-41ffb6f2851a
-using JSON3
-
 # ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
 include("../ODESource.jl")
+
+# ╔═╡ 6793be34-9055-403f-a16f-90c57201f843
+theme(:dark)
 
 # ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
 sdev = PortAudio.devices()
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[3],0,2)
+soundcard = PortAudioStream(sdev[5],0,2)
 
 # ╔═╡ 62b22e27-b50e-442b-b8b3-5ad955c000d2
 function lorenz!(du,u,p,t)
@@ -65,21 +62,45 @@ ode_source = ODESource(Float64, thomas!, 44100, 5.0, [1.0;1.1;-0.01],[0.2,0.2]);
 # ╔═╡ abd92eb6-6963-43d8-b277-c6940d56ecde
 mapping = [1 0; 0 1; 0 0];
 
+# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╠═╡ disabled = true
+#=╠═╡
+ode_stream = Threads.@spawn begin
+    while ode_source.gain>0.0
+        @pipe read(ode_source, 0.05u"s") |> mixer(mapping,_) |> write(soundcard, _)
+    end
+end
+  ╠═╡ =#
+
+# ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
+@bind ticks Clock(0.1,true)
+
 # ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
 md"""
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) 
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) 
 gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
+azimut $(@bind az Slider(0:5:90,default=60;show_value=true)) 
+elevation $(@bind el Slider(0:5:90,default=30;show_value=true)) \
 reset IC $(@bind resetic Button("reset!")) 
 tail $(@bind tail Slider(30:50:500,default=100;show_value=true)) 
 """
 
-# ╔═╡ 5caeb4e7-1a8a-4ff1-885f-155aa83fd341
-sol = solve(ODEProblem(thomas!,ode_source.uini,(ode_source.time,ode_source.time+tail),[a,b]));
+# ╔═╡ 46107d77-d3f6-4432-b269-7bb67eda8e78
+begin
+	ticks
+	sol = solve(ODEProblem(thomas!,ode_source.uini,(ode_source.time,ode_source.time+tail),[a,b]));
+end;
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
- plot(sol,vars=(1,2,3),c=:yellow,label="thomas")
+plot(sol,vars=(1,2,3),c=:yellow,label="thomas",size=(800,600), camera = (az, el))
+
+
+# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# some values
+#a = 1.47 b = 0.195 dt = 0.035
+#a = 1.12 b = 0.2 dt = 0.06
 
 # ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
 begin
@@ -94,6 +115,7 @@ begin
 	ode_source.uini=[1.0;1.1;-0.001]
 end	
 
+<<<<<<< HEAD
 # ╔═╡ 04c99f26-9c42-46cb-b9ef-d3a0927093b9
 sock1 = UDPSocket()
 
@@ -126,6 +148,8 @@ ode_stream
 # ╔═╡ fe2cbfab-2b45-4bad-8ef4-f0c4a7cec5e7
 @pipe read(ode_source, 0.04u"s") |> send_osc(sock1,_) |> mixer(mapping,_) |> write(soundcard, _)
 
+=======
+>>>>>>> 63c2ac242b82dd4fb108095270da9017e3f5b8bf
 # ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
 html"""
 <style>
@@ -135,28 +159,19 @@ input[type*="range"] {
 </style>
 """
 
-# ╔═╡ 6793be34-9055-403f-a16f-90c57201f843
-theme(:dark)
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
-OpenSoundControl = "2ff8ee2d-9747-4b2b-b699-45d473b7b9df"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 PortAudio = "80ea8bcb-4634-5cb3-8ee8-a132660d1d2d"
 SampledSignals = "bd7594eb-a658-542f-9e75-4c4d8908c167"
-Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DifferentialEquations = "~7.1.0"
-JSON3 = "~1.9.5"
-OpenSoundControl = "~1.0.0"
 Pipe = "~1.3.0"
 Plots = "~1.29.1"
 PlutoUI = "~0.7.39"
@@ -231,18 +246,18 @@ version = "0.1.2"
 
 [[deps.ArrayLayouts]]
 deps = ["FillArrays", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "ce5666a4081cfb66035a1a46e45a34ce889bac26"
+git-tree-sha1 = "c23473c60476e62579c077534b9643ec400f792b"
 uuid = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
-version = "0.8.7"
+version = "0.8.6"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.BandedMatrices]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "200bf371f8bf6c3db1eb7430b56bc237ebce98a5"
+git-tree-sha1 = "960ad9a4b34380595500f60add129e178740c3a6"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "0.17.1"
+version = "0.17.0"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -741,9 +756,9 @@ version = "2.8.1+1"
 
 [[deps.HostCPUFeatures]]
 deps = ["BitTwiddlingConvenienceFunctions", "IfElse", "Libdl", "Static"]
-git-tree-sha1 = "b7b88a4716ac33fe31d6556c02fc60017594343c"
+git-tree-sha1 = "18be5268cf415b5e27f34980ed25a7d34261aa83"
 uuid = "3e5b6fbb-0976-4d2c-9146-d79de83f2fb0"
-version = "0.1.8"
+version = "0.1.7"
 
 [[deps.HypergeometricFunctions]]
 deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
@@ -845,12 +860,6 @@ git-tree-sha1 = "3c837543ddb02250ef42f4738347454f95079d4e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.3"
 
-[[deps.JSON3]]
-deps = ["Dates", "Mmap", "Parsers", "StructTypes", "UUIDs"]
-git-tree-sha1 = "fd6f0cae36f42525567108a42c1c674af2ac620d"
-uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
-version = "1.9.5"
-
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b53380851c6e6664204efb2e62cd24fa5c47e4ba"
@@ -924,9 +933,9 @@ version = "0.15.15"
 
 [[deps.LayoutPointers]]
 deps = ["ArrayInterface", "ArrayInterfaceOffsetArrays", "ArrayInterfaceStaticArrays", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static"]
-git-tree-sha1 = "b67e749fb35530979839e7b4b606a97105fe4f1c"
+git-tree-sha1 = "a575de5a424a395217930fea6d0934ea853d0158"
 uuid = "10f19ff3-798f-405d-979b-55457f8fc047"
-version = "0.1.10"
+version = "0.1.9"
 
 [[deps.LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
@@ -1168,12 +1177,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "ab05aa4cc89736e95915b01e7279e61b1bfe33b8"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
 version = "1.1.14+0"
-
-[[deps.OpenSoundControl]]
-deps = ["Printf", "Test"]
-git-tree-sha1 = "891f8602af7af6324354601e726ae7b48c41fdab"
-uuid = "2ff8ee2d-9747-4b2b-b699-45d473b7b9df"
-version = "1.0.0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1584,12 +1587,6 @@ deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
 git-tree-sha1 = "9abba8f8fb8458e9adf07c8a2377a070674a24f1"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 version = "0.6.8"
-
-[[deps.StructTypes]]
-deps = ["Dates", "UUIDs"]
-git-tree-sha1 = "d24a825a95a6d98c385001212dc9020d609f2d4f"
-uuid = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
-version = "1.8.1"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -2017,29 +2014,23 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
-# ╠═3fd2ca36-dce5-41d9-a4f1-f1f95b1ec593
+# ╠═6793be34-9055-403f-a16f-90c57201f843
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╟─62b22e27-b50e-442b-b8b3-5ad955c000d2
-# ╠═70081217-e4d0-4633-a30a-30ed96ce03b1
+# ╟─70081217-e4d0-4633-a30a-30ed96ce03b1
 # ╠═53cdcf81-3a83-42f0-a338-b32094200298
 # ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
-# ╠═5caeb4e7-1a8a-4ff1-885f-155aa83fd341
+# ╠═46107d77-d3f6-4432-b269-7bb67eda8e78
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╟─bac44977-95a5-470d-80a3-1c5e4a24dbe6
-# ╠═98de6555-d4f5-4cd6-9875-b7a17957dc96
-# ╠═f69b0c75-f868-4d0e-9cde-230ee32dc184
-# ╠═9fa17e98-7a05-4473-9d38-f0f5f348da60
-# ╠═97356372-6135-46fd-8757-fa71c20e0f18
-# ╠═04c99f26-9c42-46cb-b9ef-d3a0927093b9
-# ╠═c309ffb3-a956-448c-9173-41ffb6f2851a
-# ╠═581fc3ad-9a1a-4e05-8ece-a89e4217088a
-# ╠═8b95fa98-95a3-4dbb-af50-2f5d4537c988
-# ╠═a07b7dcc-458e-4b8a-a563-c36abc5774db
-# ╠═fe2cbfab-2b45-4bad-8ef4-f0c4a7cec5e7
+# ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
+# ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
+# ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
+# ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184
+# ╟─9fa17e98-7a05-4473-9d38-f0f5f348da60
 # ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
-# ╠═6793be34-9055-403f-a16f-90c57201f843
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
