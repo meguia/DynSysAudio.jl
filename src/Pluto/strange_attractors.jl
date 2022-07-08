@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -13,6 +13,9 @@ macro bind(def, element)
         el
     end
 end
+
+# ╔═╡ f735551e-9eb0-44d1-9b28-2e52437dab3e
+using Pkg; Pkg.add("DifferentialEquations");Pkg.add("PortAudio");Pkg.add("SampledSignals");Pkg.add("Unitful");Pkg.add("PlutoUI");Pkg.add("DSP");Pkg.add("Plots")
 
 # ╔═╡ ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, DSP, Plots
@@ -1976,6 +1979,7 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
+# ╠═f735551e-9eb0-44d1-9b28-2e52437dab3e
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═6793be34-9055-403f-a16f-90c57201f843
