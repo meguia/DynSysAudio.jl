@@ -33,7 +33,7 @@ theme(:dark)
 sdev = PortAudio.devices()
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[2],0,2) #CHECK YOUR AUDIO OUTPUT
+soundcard = PortAudioStream(sdev[6],0,2) #CHECK YOUR AUDIO OUTPUT
 
 # ╔═╡ 53cdcf81-3a83-42f0-a338-b32094200298
 function thomas!(du,u,p,t)
@@ -48,17 +48,21 @@ mapping = [1 0; 0 1; 0 0];
 # ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
 @bind ticks Clock(0.1,true)
 
+# ╔═╡ 52f25ad8-540a-4505-9690-877a223d0a41
+md"""
+azimut $(@bind az Slider(0:5:90,default=60;show_value=true)) 
+elevation $(@bind el Slider(0:5:90,default=30;show_value=true)) \
+tail $(@bind tail Slider(30:50:500,default=100;show_value=true)) 
+"""
+
 # ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
 md"""
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) 
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) 
 gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
-azimut $(@bind az Slider(0:5:90,default=60;show_value=true)) 
-elevation $(@bind el Slider(0:5:90,default=30;show_value=true)) \
 reset $(@bind resetic Button("reset!")) 
 restart  $(@bind restart Button("restart!"))
-tail $(@bind tail Slider(30:50:500,default=100;show_value=true)) 
 """
 
 # ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
@@ -115,7 +119,7 @@ input[type*="range"] {
 """
 
 # ╔═╡ Cell order:
-# ╠═f735551e-9eb0-44d1-9b28-2e52437dab3e
+# ╟─f735551e-9eb0-44d1-9b28-2e52437dab3e
 # ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
 # ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
 # ╠═6793be34-9055-403f-a16f-90c57201f843
@@ -126,6 +130,7 @@ input[type*="range"] {
 # ╟─abd92eb6-6963-43d8-b277-c6940d56ecde
 # ╟─9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
+# ╟─52f25ad8-540a-4505-9690-877a223d0a41
 # ╟─bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
