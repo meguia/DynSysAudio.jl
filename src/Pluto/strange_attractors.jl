@@ -60,9 +60,11 @@ md"""
 a $(@bind a Slider(0.0:0.01:5.0,default=1.0;show_value=true)) 
 b $(@bind b Slider(0.0:0.001:1.0,default=0.2;show_value=true)) \
 Δt $(@bind Δt Slider(0.001:0.001:1.0,default=0.11;show_value=true)) 
-gain $(@bind g Slider(0:0.001:0.2,default=0.1;show_value=true)) \
+gain $(@bind g Slider(0:0.001:0.2,default=0.0;show_value=true)) \
 reset $(@bind resetic Button("reset!")) 
-restart  $(@bind restart Button("restart!"))
+(re)start  $(@bind restart Button("restart!"))  \
+To turn off: move gain to zero \
+To turn on: move gain to a value greater than zero and push restart!
 """
 
 # ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
@@ -133,7 +135,7 @@ input[type*="range"] {
 # ╟─52f25ad8-540a-4505-9690-877a223d0a41
 # ╟─bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
-# ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# ╟─17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # ╟─a81916f4-595f-4175-a5dc-510e38cb5076
 # ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184
 # ╟─46107d77-d3f6-4432-b269-7bb67eda8e78
