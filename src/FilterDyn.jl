@@ -7,11 +7,11 @@ mutable struct FilterDyn{T}
 end
 
 function FilterDyn(samplerate::Number,nchannels::Int64;order=4,lcut=nothing,hcut=nothing)
-    if hcut!=nothing && lcut!=nothing
+    if hcut!==nothing && lcut!==nothing
         responsetype = Bandpass(lcut, hcut; fs=samplerate)
-    elseif lcut!=nothing
+    elseif lcut!==nothing
         responsetype = Highpass(lcut; fs=samplerate)
-    elseif hcut!=nothing
+    elseif hcut!==nothing
         responsetype = Lowhpass(hcut; fs=samplerate)
     else    
         error("lcut and/or hcut must be defined")

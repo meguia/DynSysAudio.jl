@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.9
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
@@ -33,7 +33,7 @@ theme(:dark)
 sdev = PortAudio.devices()
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[6],0,2) #CHECK YOUR AUDIO OUTPUT
+soundcard = PortAudioStream(sdev[16],0,2) #CHECK YOUR AUDIO OUTPUT
 
 # ╔═╡ 53cdcf81-3a83-42f0-a338-b32094200298
 function thomas!(du,u,p,t)
@@ -83,7 +83,7 @@ begin
 	ode_source.gain = 0.1
 	ode_stream = Threads.@spawn begin
 	    while ode_source.gain>0.0
-	        @pipe read(ode_source, 0.05u"s") |> DynSysAudio.mixer(mapping,_) |> write(soundcard, _)
+	        @pipe read(ode_source, 0.01u"s") |> DynSysAudio.mixer(mapping,_) |> write(soundcard, _)
 	    end
 	end
 end;
@@ -102,7 +102,7 @@ begin
 end;
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
-plot(sol,vars=(1,2,3),c=:yellow,label="thomas",size=(800,600), camera = (az, el))
+plot(sol,idxs=(1,2,3),c=:yellow,label="thomas",size=(800,600), camera = (az, el))
 
 
 # ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
@@ -128,12 +128,12 @@ input[type*="range"] {
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
-# ╟─53cdcf81-3a83-42f0-a338-b32094200298
-# ╟─abd92eb6-6963-43d8-b277-c6940d56ecde
-# ╟─9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╠═53cdcf81-3a83-42f0-a338-b32094200298
+# ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
+# ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
 # ╟─52f25ad8-540a-4505-9690-877a223d0a41
-# ╟─bac44977-95a5-470d-80a3-1c5e4a24dbe6
+# ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╟─17cda66b-c90c-47bd-8883-fc5a4949a0b3
 # ╟─a81916f4-595f-4175-a5dc-510e38cb5076
