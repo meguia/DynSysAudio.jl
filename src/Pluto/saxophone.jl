@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.25
 
 using Markdown
 using InteractiveUtils
@@ -30,7 +30,7 @@ sdev = PortAudio.devices()
 fs = 16000; # sampling rate
 
 # ╔═╡ b8217137-74cd-438f-8050-5a386f02f163
-soundcard = PortAudioStream(sdev[16],0,2; samplerate=fs)
+soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
 
 # ╔═╡ 9aa3b1af-9c9e-4230-bdc2-e82f798eb552
 dt = 1/fs # fixed time step
@@ -83,14 +83,11 @@ begin
 end;
 
 # ╔═╡ 268d43d4-3ae2-4d10-8ea7-2e3ef8a90926
-# ╠═╡ disabled = true
-#=╠═╡
 ode_stream = Threads.@spawn begin
     while ode_source.gain>0.0
         @pipe read(ode_source, 0.02u"s") |> mixer(mapping,_) |> write(soundcard, _)
     end
 end
-  ╠═╡ =#
 
 # ╔═╡ b4884482-421e-46f9-85f6-f464554069b4
 begin
@@ -123,7 +120,7 @@ Unitful = "~1.11.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.1"
+julia_version = "1.9.0"
 manifest_format = "2.0"
 project_hash = "93b3d1c28a090babc77cdf71d147774c7c650de8"
 
@@ -2114,7 +2111,7 @@ version = "0.8.0+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+0"
+version = "5.7.0+0"
 
 [[deps.libcap_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2205,7 +2202,7 @@ version = "1.4.1+0"
 # ╠═043aef76-cee3-438f-a570-eb2f97cc428b
 # ╠═d516dafd-f852-4ee8-a211-76634e24ec81
 # ╠═268d43d4-3ae2-4d10-8ea7-2e3ef8a90926
-# ╠═b7f55408-7fe8-4ba8-9ee9-862fdb4e6355
+# ╟─b7f55408-7fe8-4ba8-9ee9-862fdb4e6355
 # ╠═0b9b0fbe-9df6-4c65-b8dd-1f49706b0ecc
 # ╠═9cf5b499-d141-4f21-8e79-5a17280a5b44
 # ╠═b4884482-421e-46f9-85f6-f464554069b4
