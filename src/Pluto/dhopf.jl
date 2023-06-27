@@ -14,76 +14,60 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ ca79dbd0-e662-11ec-3fd3-952bfc9d3247
+# ╔═╡ 4577a240-148b-11ee-2857-2f82afeabddf
 using DifferentialEquations, PortAudio,SampledSignals, Unitful, PlutoUI, DSP, Plots
 
-# ╔═╡ 1a5f71e9-0451-4e76-9526-e6f283ea9531
+# ╔═╡ 70c9e82d-d50b-40e5-a0c7-982f8e2ff6cd
 using Pipe: @pipe
 
-# ╔═╡ 243593f5-eaa7-4a47-8470-46abd9b64cf5
+# ╔═╡ 5b547b07-02db-40ae-94f6-bd11e9f56edf
 include("../DynSysAudio.jl")
 
-# ╔═╡ 6793be34-9055-403f-a16f-90c57201f843
+# ╔═╡ 91dd79eb-e786-4530-91e6-7f0445be2182
 theme(:dark)
 
-# ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
+# ╔═╡ dc9cdaab-d19d-4cd1-8848-db8413d664f1
 sdev = PortAudio.devices()
 
-# ╔═╡ 289ee009-aef1-4dad-8913-207cd5fa82d0
-fs = 16000;
+# ╔═╡ b432e4d1-aa2e-44bd-aa5a-a4e5d65cb83b
+fs=16000
 
-# ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
+# ╔═╡ d0b20bfb-3d9d-4028-bf20-a693dc65df14
+soundcard = PortAudioStream(sdev[33],0,2; samplerate=fs)
 
-# ╔═╡ 307d5fb1-2db1-47e4-a5a0-8ecf6028df65
-function chenlee!(du,u,p,t)
-	du[1] = p[1]*u[1] - u[2]*u[3]
-	du[2] = p[2]*u[2] + u[1]*u[3]
-	du[3] = p[3]*u[3] + u[1]*u[2]/3	
+# ╔═╡ 11741182-e5de-44f9-9fcc-b8a8624c6041
+function dhopf!(du,u,p,t)
+	(η1,η2,η3) = p
+	du[1] = η1*(0.5*u[1]+u[2]-u[4]-u[1]*(0.6*u[1]+u[1]*u[1]))
+	du[2] = -η3*u[1]
+	du[3] = 2.4*u[4]
+	du[4] = 0.6*(u[1]-u[3]-η2*u[4])
 end
 
-# ╔═╡ 53cdcf81-3a83-42f0-a338-b32094200298
-function thomas!(du,u,p,t)
-	du[1]=sin(p[1]*u[2])-p[2]*u[1]
-	du[2]=sin(p[1]*u[3])-p[2]*u[2]
-	du[3]=sin(p[1]*u[1])-p[2]*u[3]
-end		
+# ╔═╡ 902006ca-8e5a-4efa-960a-efd6e6a5b8b1
+mapping = [1 0; 0 1; 1 0; 0 1];
 
-# ╔═╡ abd92eb6-6963-43d8-b277-c6940d56ecde
-mapping = [1 0; 0 1; 0 0];
+# ╔═╡ c6bbc507-d7fc-4fa8-9935-32686157371e
+ode_source = DynSysAudio.ODESource(Float64, dhopf!, fs, 0.01, [0.5;0.5;0.5;0.5],[1.8,1.5,0.7]);
 
-# ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
+# ╔═╡ c7fb1245-1fde-45a9-a7cf-e6d6e237b6c7
 @bind ticks Clock(0.1,true)
 
-# ╔═╡ 52f25ad8-540a-4505-9690-877a223d0a41
+# ╔═╡ b7f0030b-5028-4275-8e25-57a6c549a0e3
 md"""
-azimut $(@bind az Slider(0:5:90,default=60;show_value=true)) 
-elevation $(@bind el Slider(0:5:90,default=30;show_value=true)) \
-tail $(@bind tail Slider(30:50:500,default=100;show_value=true)) 
-"""
-
-# ╔═╡ 98de6555-d4f5-4cd6-9875-b7a17957dc96
-md"""
-a $(@bind a Slider(3.0:0.02:6.0,default=5.0;show_value=true)) 
-b $(@bind b Slider(-15:0.1:-5.0,default=-10;show_value=true)) \
-d $(@bind d Slider(-1.5:0.01:0.0,default=-0.38;show_value=true)) 
-Δt $(@bind Δt Slider(0.0005:0.0005:0.02,default=0.01;show_value=true)) \
+p1 $(@bind p1 Slider(1.0:0.001:3.0,default=1.85;show_value=true)) 
+p2 $(@bind p2 Slider(1.4:0.001:2.0,default=1.65;show_value=true)) \
+p3 $(@bind p3 Slider(0.5:0.001:1.0,default=0.77;show_value=true)) 
+Δt $(@bind Δt Slider(0.01:0.01:0.2,default=0.07;show_value=true)) \
 gain $(@bind g Slider(0:0.001:0.2,default=0.0;show_value=true)) 
+tail $(@bind tail Slider(20:20:400,default=60;show_value=true)) \
 reset $(@bind resetic Button("reset!")) 
 (re)start  $(@bind restart Button("restart!"))  \
 To turn off: move gain to zero \
 To turn on: move gain to a value greater than zero and push restart!
 """
 
-# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
-# some values
-#a = 1.47 b = 0.195 dt = 0.035
-#a = 1.12 b = 0.2 dt = 0.06
-
-# ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = DynSysAudio.ODESource(Float64, chenlee!, fs, 0.1, [0.1;0.1;1.01],[5.0,-10,-0.38]);
-
-# ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╔═╡ c2138306-c289-4402-8a5a-9a0606f80055
 begin
 	restart
 	ode_source.gain = 0.0
@@ -91,41 +75,35 @@ begin
 	ode_source.gain = 0.1
 	ode_stream = Threads.@spawn begin
 	    while ode_source.gain>0.0
-	        @pipe read(ode_source, 0.01u"s") |> DynSysAudio.mixer(mapping,_) |> write(soundcard, _)
+	        @pipe read(ode_source, 0.1u"s") |> DynSysAudio.mixer(mapping,_) |> write(soundcard, _)
 	    end
 	end
 end;
 
-# ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
+# ╔═╡ 2ce48512-cca3-444c-8611-a5f4df0aa9da
 begin
 	ode_source.gain=g
-	ode_source.pars=[a,b,d]
+	ode_source.pars=[p1,p2,p3]
 	ode_source.dt=Δt
 end;
 
-# ╔═╡ 46107d77-d3f6-4432-b269-7bb67eda8e78
+# ╔═╡ 52cb5eeb-9ba1-41f2-8c35-a376097b0ab3
 begin
 	ticks
-	sol = solve(ODEProblem(chenlee!,ode_source.uini,(ode_source.time,ode_source.time+tail),[a,b,d]));
+	sol = solve(ODEProblem(dhopf!,ode_source.uini,(ode_source.time,ode_source.time+tail),[p1,p2,p3]));
 end;
 
-# ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
-plot(sol,idxs=(1,2,3),c=:yellow,size=(2000,1500),xlim=[-20,20],ylim=[-20,20],zlim=[0,20],camera=[az, el])
+# ╔═╡ f9d90fae-df52-45aa-beee-11ba226eee9a
+begin
+	plot(sol,idxs=(2,4),c=:yellow)
+	plot!(sol,idxs=(1,3),c=:red,size=(2000,1500),ylim=(-1,1),xlim=(-1,1),legend=false)
+end	
 
-# ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
+# ╔═╡ b33cd0fa-ad74-4fec-94b9-042caba53aad
 begin
 	resetic
-	ode_source.uini=[0.1;0.1;1.01]
+	ode_source.uini=[0.1;0.1;0.1;0.1]
 end;
-
-# ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
-html"""
-<style>
-input[type*="range"] {
-	width: 30%;
-}
-</style>
-"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -159,9 +137,9 @@ manifest_format = "2.0"
 project_hash = "ae4b3d9a99e00fad6b23148e436716a08b49df95"
 
 [[deps.ADTypes]]
-git-tree-sha1 = "dcfdf328328f2645531c4ddebf841228aef74130"
+git-tree-sha1 = "891771fcf2db8427453eed9eee66847fda5abcc3"
 uuid = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
-version = "0.1.3"
+version = "0.1.4"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -529,9 +507,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "4ed4a6df2548a72f66e03f3a285cd1f3b573035d"
+git-tree-sha1 = "db40d3aff76ea6a3619fdd15a8c78299221a2394"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.96"
+version = "0.25.97"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -2264,26 +2242,22 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═ca79dbd0-e662-11ec-3fd3-952bfc9d3247
-# ╠═1a5f71e9-0451-4e76-9526-e6f283ea9531
-# ╠═6793be34-9055-403f-a16f-90c57201f843
-# ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
-# ╠═02489954-cc81-4e08-bc20-70147414f0bb
-# ╠═289ee009-aef1-4dad-8913-207cd5fa82d0
-# ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
-# ╠═307d5fb1-2db1-47e4-a5a0-8ecf6028df65
-# ╠═53cdcf81-3a83-42f0-a338-b32094200298
-# ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
-# ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
-# ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
-# ╟─52f25ad8-540a-4505-9690-877a223d0a41
-# ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
-# ╠═98de6555-d4f5-4cd6-9875-b7a17957dc96
-# ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
-# ╠═a81916f4-595f-4175-a5dc-510e38cb5076
-# ╠═f69b0c75-f868-4d0e-9cde-230ee32dc184
-# ╠═46107d77-d3f6-4432-b269-7bb67eda8e78
-# ╠═9fa17e98-7a05-4473-9d38-f0f5f348da60
-# ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
+# ╠═4577a240-148b-11ee-2857-2f82afeabddf
+# ╠═70c9e82d-d50b-40e5-a0c7-982f8e2ff6cd
+# ╠═91dd79eb-e786-4530-91e6-7f0445be2182
+# ╠═5b547b07-02db-40ae-94f6-bd11e9f56edf
+# ╠═dc9cdaab-d19d-4cd1-8848-db8413d664f1
+# ╠═b432e4d1-aa2e-44bd-aa5a-a4e5d65cb83b
+# ╠═d0b20bfb-3d9d-4028-bf20-a693dc65df14
+# ╠═11741182-e5de-44f9-9fcc-b8a8624c6041
+# ╠═902006ca-8e5a-4efa-960a-efd6e6a5b8b1
+# ╠═c6bbc507-d7fc-4fa8-9935-32686157371e
+# ╠═c2138306-c289-4402-8a5a-9a0606f80055
+# ╠═c7fb1245-1fde-45a9-a7cf-e6d6e237b6c7
+# ╠═f9d90fae-df52-45aa-beee-11ba226eee9a
+# ╟─b7f0030b-5028-4275-8e25-57a6c549a0e3
+# ╠═2ce48512-cca3-444c-8611-a5f4df0aa9da
+# ╠═52cb5eeb-9ba1-41f2-8c35-a376097b0ab3
+# ╠═b33cd0fa-ad74-4fec-94b9-042caba53aad
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

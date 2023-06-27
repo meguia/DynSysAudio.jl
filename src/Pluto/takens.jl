@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
@@ -33,7 +33,7 @@ sdev = PortAudio.devices()
 fs = 16000;
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
+soundcard = PortAudioStream(sdev[33],0,2; samplerate=fs)
 
 # ╔═╡ 62b22e27-b50e-442b-b8b3-5ad955c000d2
 function takens3!(du,u,p,t)
@@ -42,7 +42,7 @@ function takens3!(du,u,p,t)
 end    
 
 # ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = ODESource(Float64, takens3!, fs, 0.1, [0.1,0.1],[-0.1,-0.1,0.1,0.1,0.1]);
+ode_source = ODESource(Float64, takens3!, fs, 0.01, [0.1,0.1],[-0.1,-0.1,0.1,0.1,0.1]);
 
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
 ode_stream = Threads.@spawn begin
@@ -63,6 +63,8 @@ A $(@bind A Slider(0.0:0.001:0.2,default=0.01;show_value=true))
 """
 
 # ╔═╡ 6c2a6767-09a2-4692-811a-b116795979b7
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	hcl=load("TBbif.jld2","hcl");
 	sn=load("TBbif.jld2","sn");
@@ -72,6 +74,7 @@ begin
 	scatter!([μ2],[μ1])
 	plot!(μ2 .+A*cos.(0:pi/20:2*pi),μ1 .+B*sin.(0:pi/20:2*pi))
 end	
+  ╠═╡ =#
 
 # ╔═╡ 918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 begin
@@ -116,7 +119,7 @@ Unitful = "~1.14.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.0"
+julia_version = "1.9.1"
 manifest_format = "2.0"
 project_hash = "6212aded2c0a962af7f5304bc02dccb021b706de"
 
@@ -2158,7 +2161,7 @@ version = "0.8.0+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.7.0+0"
+version = "5.8.0+0"
 
 [[deps.libcap_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
