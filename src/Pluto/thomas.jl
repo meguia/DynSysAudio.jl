@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
@@ -102,7 +102,7 @@ begin
 end;
 
 # ╔═╡ bac44977-95a5-470d-80a3-1c5e4a24dbe6
-plot(sol,idxs=(1,2,3),c=:yellow,size=(1200,800),xlim=(-4,4),ylim=(-4,4),zlim=(-4,4),camera=[az, el],legend=false)
+plot(sol,idxs=(1,2,3),c=:yellow,size=(1000,600),xlim=(-4,4),ylim=(-4,4),zlim=(-4,4),camera=[az, el],legend=false)
 
 # ╔═╡ 9fa17e98-7a05-4473-9d38-f0f5f348da60
 begin
@@ -115,6 +115,21 @@ html"""
 <style>
 input[type*="range"] {
 	width: 30%;
+}
+</style>
+"""
+
+# ╔═╡ 1b10326a-ff07-42a6-82a3-e5482c714a75
+html"""
+<style>
+main {
+		margin: 0 auto;
+		max-width: 1800px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
+input[type*="range"] {
+	width: 40%;
 }
 </style>
 """
@@ -2265,16 +2280,17 @@ version = "1.4.1+0"
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╠═53cdcf81-3a83-42f0-a338-b32094200298
 # ╠═abd92eb6-6963-43d8-b277-c6940d56ecde
-# ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╟─9e6b85e1-345a-4519-b095-45ff33a67a2a
+# ╠═a81916f4-595f-4175-a5dc-510e38cb5076
 # ╠═b820531d-75a2-4049-ba55-822c3b3d3b9b
 # ╟─52f25ad8-540a-4505-9690-877a223d0a41
 # ╠═bac44977-95a5-470d-80a3-1c5e4a24dbe6
 # ╟─98de6555-d4f5-4cd6-9875-b7a17957dc96
 # ╠═17cda66b-c90c-47bd-8883-fc5a4949a0b3
-# ╠═a81916f4-595f-4175-a5dc-510e38cb5076
-# ╠═f69b0c75-f868-4d0e-9cde-230ee32dc184
-# ╠═46107d77-d3f6-4432-b269-7bb67eda8e78
-# ╠═9fa17e98-7a05-4473-9d38-f0f5f348da60
+# ╟─f69b0c75-f868-4d0e-9cde-230ee32dc184
+# ╟─46107d77-d3f6-4432-b269-7bb67eda8e78
+# ╟─9fa17e98-7a05-4473-9d38-f0f5f348da60
 # ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
+# ╟─1b10326a-ff07-42a6-82a3-e5482c714a75
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

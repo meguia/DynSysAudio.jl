@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
@@ -33,7 +33,7 @@ fs = 16000; # sampling rate
 soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
 
 # ╔═╡ 9aa3b1af-9c9e-4230-bdc2-e82f798eb552
-dt = 1/fs # fixed time step
+dt = 1/fs; # fixed time step
 
 # ╔═╡ e1191752-8f42-45bf-86fb-d0573aeaf26e
 function saxRN!(dx,x,p,t)
@@ -94,6 +94,21 @@ begin
 	resetic
 	ode_source.uini=xini
 end	;
+
+# ╔═╡ d2358f15-af8d-4103-8092-75a75496da4e
+html"""
+<style>
+main {
+		margin: 0 auto;
+		max-width: 1800px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
+input[type*="range"] {
+	width: 40%;
+}
+</style>
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2203,8 +2218,9 @@ version = "1.4.1+0"
 # ╠═d516dafd-f852-4ee8-a211-76634e24ec81
 # ╠═268d43d4-3ae2-4d10-8ea7-2e3ef8a90926
 # ╟─b7f55408-7fe8-4ba8-9ee9-862fdb4e6355
-# ╠═0b9b0fbe-9df6-4c65-b8dd-1f49706b0ecc
-# ╠═9cf5b499-d141-4f21-8e79-5a17280a5b44
-# ╠═b4884482-421e-46f9-85f6-f464554069b4
+# ╟─0b9b0fbe-9df6-4c65-b8dd-1f49706b0ecc
+# ╟─9cf5b499-d141-4f21-8e79-5a17280a5b44
+# ╟─b4884482-421e-46f9-85f6-f464554069b4
+# ╟─d2358f15-af8d-4103-8092-75a75496da4e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

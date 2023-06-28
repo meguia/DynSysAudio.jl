@@ -33,7 +33,7 @@ sdev = PortAudio.devices()
 fs = 16000;
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[33],0,2; samplerate=fs)
+soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
 
 # ╔═╡ 62b22e27-b50e-442b-b8b3-5ad955c000d2
 function takens3!(du,u,p,t)
@@ -63,31 +63,34 @@ A $(@bind A Slider(0.0:0.001:0.2,default=0.01;show_value=true))
 """
 
 # ╔═╡ 6c2a6767-09a2-4692-811a-b116795979b7
-# ╠═╡ disabled = true
-#=╠═╡
 begin
 	hcl=load("TBbif.jld2","hcl");
 	sn=load("TBbif.jld2","sn");
 	plot([-0.4,0],[0,0],label="Hopf")
 	plot!(sn[:,2],sn[:,1],label="Saddle-Node",xlims=(-0.35,0.0),ylims=(-0.12,0.025))
 	plot!(hcl[:,1],hcl[:,2],label="Homoclinic",xaxis=("μ2"),yaxis=("μ1"))
-	scatter!([μ2],[μ1])
-	plot!(μ2 .+A*cos.(0:pi/20:2*pi),μ1 .+B*sin.(0:pi/20:2*pi))
+	scatter!([μ2],[μ1],label="center")
+	plot!(μ2 .+A*cos.(0:pi/20:2*pi),μ1 .+B*sin.(0:pi/20:2*pi),size=(1000,600),label="Modulation")
 end	
-  ╠═╡ =#
 
 # ╔═╡ 918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 begin
 	ode_source.gain=g
 	ode_source.pars=[μ1,μ2,A,B,ω]
 	ode_source.dt=Δt
-end	
+end;
 
 # ╔═╡ 3f683dd7-0938-454c-a61a-6cde2fb87fce
 html"""
 <style>
+main {
+		margin: 0 auto;
+		max-width: 1800px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
 input[type*="range"] {
-	width: 30%;
+	width: 40%;
 }
 </style>
 """
@@ -119,7 +122,7 @@ Unitful = "~1.14.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.1"
+julia_version = "1.9.0"
 manifest_format = "2.0"
 project_hash = "6212aded2c0a962af7f5304bc02dccb021b706de"
 
@@ -2161,7 +2164,7 @@ version = "0.8.0+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+0"
+version = "5.7.0+0"
 
 [[deps.libcap_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2253,7 +2256,7 @@ version = "1.4.1+0"
 # ╠═9e6b85e1-345a-4519-b095-45ff33a67a2a
 # ╟─6c2a6767-09a2-4692-811a-b116795979b7
 # ╟─96a93b3c-4918-4eca-b537-ed4b5d81c26e
-# ╠═918e4fa7-3ff0-4d07-84ed-f19d98cbe582
+# ╟─918e4fa7-3ff0-4d07-84ed-f19d98cbe582
 # ╟─3f683dd7-0938-454c-a61a-6cde2fb87fce
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -33,7 +33,7 @@ sdev = PortAudio.devices()
 fs=16000
 
 # ╔═╡ d0b20bfb-3d9d-4028-bf20-a693dc65df14
-soundcard = PortAudioStream(sdev[33],0,2; samplerate=fs)
+soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
 
 # ╔═╡ 11741182-e5de-44f9-9fcc-b8a8624c6041
 function dhopf!(du,u,p,t)
@@ -55,11 +55,11 @@ ode_source = DynSysAudio.ODESource(Float64, dhopf!, fs, 0.01, [0.5;0.5;0.5;0.5],
 
 # ╔═╡ b7f0030b-5028-4275-8e25-57a6c549a0e3
 md"""
-p1 $(@bind p1 Slider(1.0:0.001:3.0,default=1.85;show_value=true)) 
-p2 $(@bind p2 Slider(1.4:0.001:2.0,default=1.65;show_value=true)) \
-p3 $(@bind p3 Slider(0.5:0.001:1.0,default=0.77;show_value=true)) 
+p1 $(@bind p1 Slider(1.0:0.001:3.0,default=2.16;show_value=true)) 
+p2 $(@bind p2 Slider(1.4:0.001:2.0,default=1.6;show_value=true)) \
+p3 $(@bind p3 Slider(0.5:0.001:1.0,default=0.71;show_value=true)) 
 Δt $(@bind Δt Slider(0.01:0.01:0.2,default=0.07;show_value=true)) \
-gain $(@bind g Slider(0:0.001:0.2,default=0.0;show_value=true)) 
+gain $(@bind g Slider(0:0.001:1.0,default=0.0;show_value=true)) 
 tail $(@bind tail Slider(20:20:400,default=60;show_value=true)) \
 reset $(@bind resetic Button("reset!")) 
 (re)start  $(@bind restart Button("restart!"))  \
@@ -96,7 +96,7 @@ end;
 # ╔═╡ f9d90fae-df52-45aa-beee-11ba226eee9a
 begin
 	plot(sol,idxs=(2,4),c=:yellow)
-	plot!(sol,idxs=(1,3),c=:red,size=(2000,1500),ylim=(-1,1),xlim=(-1,1),legend=false)
+	plot!(sol,idxs=(1,3),c=:red,size=(1000,600),ylim=(-1,1),xlim=(-1,1),legend=false)
 end	
 
 # ╔═╡ b33cd0fa-ad74-4fec-94b9-042caba53aad
@@ -104,6 +104,21 @@ begin
 	resetic
 	ode_source.uini=[0.1;0.1;0.1;0.1]
 end;
+
+# ╔═╡ 53bfefd3-28ed-4253-bdc4-7e84f56b3f70
+html"""
+<style>
+main {
+		margin: 0 auto;
+		max-width: 1800px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
+input[type*="range"] {
+	width: 40%;
+}
+</style>
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -132,7 +147,7 @@ Unitful = "~1.14.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.1"
+julia_version = "1.9.0"
 manifest_format = "2.0"
 project_hash = "ae4b3d9a99e00fad6b23148e436716a08b49df95"
 
@@ -2162,7 +2177,7 @@ version = "0.8.0+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+0"
+version = "5.7.0+0"
 
 [[deps.libcap_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2254,10 +2269,11 @@ version = "1.4.1+0"
 # ╠═c6bbc507-d7fc-4fa8-9935-32686157371e
 # ╠═c2138306-c289-4402-8a5a-9a0606f80055
 # ╠═c7fb1245-1fde-45a9-a7cf-e6d6e237b6c7
-# ╠═f9d90fae-df52-45aa-beee-11ba226eee9a
+# ╟─f9d90fae-df52-45aa-beee-11ba226eee9a
 # ╟─b7f0030b-5028-4275-8e25-57a6c549a0e3
-# ╠═2ce48512-cca3-444c-8611-a5f4df0aa9da
-# ╠═52cb5eeb-9ba1-41f2-8c35-a376097b0ab3
-# ╠═b33cd0fa-ad74-4fec-94b9-042caba53aad
+# ╟─2ce48512-cca3-444c-8611-a5f4df0aa9da
+# ╟─52cb5eeb-9ba1-41f2-8c35-a376097b0ab3
+# ╟─b33cd0fa-ad74-4fec-94b9-042caba53aad
+# ╟─53bfefd3-28ed-4253-bdc4-7e84f56b3f70
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
