@@ -27,13 +27,14 @@ include("../DynSysAudio.jl")
 theme(:dark)
 
 # ╔═╡ 02489954-cc81-4e08-bc20-70147414f0bb
-sdev = PortAudio.devices()
-
-# ╔═╡ 289ee009-aef1-4dad-8913-207cd5fa82d0
-fs = 16000;
+begin 
+	# give a name for the audio device and set the audio rate
+	device_name = "Scarlett"
+	fs = 44100
+end;
 
 # ╔═╡ 09eff68c-2541-4dbe-b87b-97a8885f2e16
-soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
+soundcard = DynSysAudio.soundcard_init("Scarlett",fs)
 
 # ╔═╡ 53cdcf81-3a83-42f0-a338-b32094200298
 function thomas!(du,u,p,t)
@@ -44,6 +45,9 @@ end
 
 # ╔═╡ abd92eb6-6963-43d8-b277-c6940d56ecde
 mapping = [1 0; 0 1; 0 0];
+
+# ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
+ode_source = DynSysAudio.ODESource(Float64, thomas!, fs, 0.1, [1.0;1.1;-0.01],[0.2,0.2]);
 
 # ╔═╡ b820531d-75a2-4049-ba55-822c3b3d3b9b
 @bind ticks Clock(0.1,true)
@@ -67,14 +71,6 @@ To turn off: move gain to zero \
 To turn on: move gain to a value greater than zero and push restart!
 """
 
-# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
-# some values
-#a = 1.47 b = 0.195 dt = 0.035
-#a = 1.12 b = 0.2 dt = 0.06
-
-# ╔═╡ a81916f4-595f-4175-a5dc-510e38cb5076
-ode_source = DynSysAudio.ODESource(Float64, thomas!, fs, 0.1, [1.0;1.1;-0.01],[0.2,0.2]);
-
 # ╔═╡ 9e6b85e1-345a-4519-b095-45ff33a67a2a
 begin
 	restart
@@ -87,6 +83,11 @@ begin
 	    end
 	end
 end;
+
+# ╔═╡ 17cda66b-c90c-47bd-8883-fc5a4949a0b3
+# some values
+#a = 1.47 b = 0.195 dt = 0.035
+#a = 1.12 b = 0.2 dt = 0.06
 
 # ╔═╡ f69b0c75-f868-4d0e-9cde-230ee32dc184
 begin
@@ -161,7 +162,7 @@ Unitful = "~1.14.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.0"
+julia_version = "1.9.2"
 manifest_format = "2.0"
 project_hash = "ae4b3d9a99e00fad6b23148e436716a08b49df95"
 
@@ -386,7 +387,7 @@ version = "3.46.2"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.2+0"
+version = "1.0.5+0"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -1351,7 +1352,7 @@ version = "0.42.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.9.0"
+version = "1.9.2"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -2191,7 +2192,7 @@ version = "0.8.0+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.7.0+0"
+version = "5.8.0+0"
 
 [[deps.libcap_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2276,7 +2277,6 @@ version = "1.4.1+0"
 # ╠═6793be34-9055-403f-a16f-90c57201f843
 # ╠═243593f5-eaa7-4a47-8470-46abd9b64cf5
 # ╠═02489954-cc81-4e08-bc20-70147414f0bb
-# ╠═289ee009-aef1-4dad-8913-207cd5fa82d0
 # ╠═09eff68c-2541-4dbe-b87b-97a8885f2e16
 # ╠═53cdcf81-3a83-42f0-a338-b32094200298
 # ╠═abd92eb6-6963-43d8-b277-c6940d56ecde

@@ -15,22 +15,23 @@ macro bind(def, element)
 end
 
 # ╔═╡ 2315e68e-edc9-11ec-3252-e5e464c6c042
-using Plots, DifferentialEquations, PortAudio, SampledSignals, Unitful, PlutoUI
+using Plots, DifferentialEquations, PortAudio, SampledSignals, Unitful, PlutoUI, DSP
 
 # ╔═╡ 2b186507-1dfa-463e-aa6c-f7e7c4bfb8ab
 using Pipe: @pipe
 
 # ╔═╡ e88f96e3-2f00-4a43-b47f-fe4311314e3c
-include("../ODESource.jl")
+include("../DynSysAudio.jl")
 
-# ╔═╡ 76e6cda6-bffb-4024-8709-3660407b286c
-sdev = PortAudio.devices()
-
-# ╔═╡ c27469d5-aee5-44e1-a8e6-b2047cd17720
-fs = 16000; # sampling rate
+# ╔═╡ e59483ad-2807-4c7c-b06c-4c99ef4776a6
+begin 
+	# give a name for the audio device and set the audio rate
+	device_name = "Scarlett"
+	fs = 44100;
+end	
 
 # ╔═╡ b8217137-74cd-438f-8050-5a386f02f163
-soundcard = PortAudioStream(sdev[9],0,2; samplerate=fs)
+soundcard = DynSysAudio.soundcard_init("Scarlett",fs)
 
 # ╔═╡ 9aa3b1af-9c9e-4230-bdc2-e82f798eb552
 dt = 1/fs; # fixed time step
@@ -59,7 +60,7 @@ end
 xini = vcat([-0.3, 0],repeat([0.0,0.001],8));
 
 # ╔═╡ d516dafd-f852-4ee8-a211-76634e24ec81
-ode_source = ODESource(Float64, saxRN!, fs, 0.1, xini,[3.0,0.6]);
+ode_source = DynSysAudio.ODESource(Float64, saxRN!, fs, 0.1, xini,[3.0,0.6]);
 
 # ╔═╡ b7f55408-7fe8-4ba8-9ee9-862fdb4e6355
 md"""
@@ -113,6 +114,7 @@ input[type*="range"] {
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -122,6 +124,7 @@ SampledSignals = "bd7594eb-a658-542f-9e75-4c4d8908c167"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+DSP = "~0.7.8"
 DifferentialEquations = "~7.1.0"
 Pipe = "~1.3.0"
 Plots = "~1.30.0"
@@ -135,9 +138,9 @@ Unitful = "~1.11.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.0"
+julia_version = "1.9.2"
 manifest_format = "2.0"
-project_hash = "93b3d1c28a090babc77cdf71d147774c7c650de8"
+project_hash = "c752256d82bc15a8938167a552e13de33497b02e"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "dcfdf328328f2645531c4ddebf841228aef74130"
@@ -349,7 +352,7 @@ version = "3.46.2"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.2+0"
+version = "1.0.5+0"
 
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -1323,7 +1326,7 @@ version = "0.42.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.9.0"
+version = "1.9.2"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -2126,7 +2129,7 @@ version = "0.8.0+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.7.0+0"
+version = "5.8.0+0"
 
 [[deps.libcap_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2209,8 +2212,7 @@ version = "1.4.1+0"
 # ╠═2315e68e-edc9-11ec-3252-e5e464c6c042
 # ╠═2b186507-1dfa-463e-aa6c-f7e7c4bfb8ab
 # ╠═e88f96e3-2f00-4a43-b47f-fe4311314e3c
-# ╠═76e6cda6-bffb-4024-8709-3660407b286c
-# ╠═c27469d5-aee5-44e1-a8e6-b2047cd17720
+# ╠═e59483ad-2807-4c7c-b06c-4c99ef4776a6
 # ╠═b8217137-74cd-438f-8050-5a386f02f163
 # ╠═9aa3b1af-9c9e-4230-bdc2-e82f798eb552
 # ╠═e1191752-8f42-45bf-86fb-d0573aeaf26e
